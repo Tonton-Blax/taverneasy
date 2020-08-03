@@ -1,6 +1,6 @@
-#Taverneasy 
+# Taverneasy 
 
-###todo
+### todo
 
 - Routeur Client (page.js ou routify ?)
 - Stratégie de cache
