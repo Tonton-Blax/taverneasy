@@ -440,194 +440,193 @@ export let dicoIcons =
   "noel": {
     "name": "Animation de Noël",
     "icon": "snowflake.svg",
-    "color": "#cdb334"
+    "color": "#5644bb"
   },
   "arts-1": {
     "name": "arts",
-    "icon": "undefined.svg",
-    "color": "#802573"
+    "icon": "CONFERENCE.svg",
+    "color": "#78eb2"
   },
   "ateliers": {
     "name": "Ateliers",
     "icon": "undefined.svg",
-    "color": "#19501c"
+    "color": "#70c4a4"
   },
   "ateliers-adultes": {
     "name": "ateliers adultes",
-    "icon": "undefined.svg",
-    "color": "#f38e82"
+    "icon": "atelier.svg",
+    "color": "#2f5386"
   },
   "ateliers-dete": {
     "name": "Ateliers d'été",
-    "icon": "undefined.svg",
-    "color": "#c0cfec"
+    "icon": "atelier.svg",
+    "color": "#90d11f"
   },
   "ateliers-en-famille": {
     "name": "ateliers en famille",
-    "icon": "undefined.svg",
-    "color": "#39ce8"
+    "icon": "atelier.svg",
+    "color": "#bffcae"
   },
   "ateliers-enfants": {
     "name": "Ateliers enfants",
-    "icon": "undefined.svg",
-    "color": "#1722c7"
+    "icon": "atelier.svg",
+    "color": "#4e7c0"
   },
   "ateliers-seniors": {
     "name": "Ateliers séniors",
-    "icon": "undefined.svg",
-    "color": "#75d5a4"
+    "icon": "atelier.svg",
+    "color": "#776833"
   },
   "bals": {
     "name": "Bals et Soirées Dansantes",
-    "icon": "undefined.svg",
-    "color": "#71646"
+    "icon": "bal.svg",
+    "color": "#f0ed2f"
   },
   "bourses": {
     "name": "Bourses",
     "icon": "undefined.svg",
-    "color": "#467f1c"
+    "color": "#790787"
   },
   "bourses-aux-jouets": {
     "name": "bourses aux jouets",
     "icon": "toys.svg",
-    "color": "#94a94b"
+    "color": "#27ae65"
   },
   "bourses-aux-livres": {
     "name": "Bourses aux livres",
-    "icon": "undefined.svg",
-    "color": "#e1b982"
+    "icon": "livres.svg",
+    "color": "#8dff2f"
   },
   "bourses-aux-vetements": {
     "name": "bourses aux vêtements",
-    "icon": "undefined.svg",
-    "color": "#e7c491"
+    "icon": "vetements.svg",
+    "color": "#19646d"
   },
   "brocantes": {
     "name": "Brocantes",
     "icon": "undefined.svg",
-    "color": "#ee8e4d"
+    "color": "#2f677"
   },
   "caritatif": {
     "name": "Caritatif",
-    "icon": "undefined.svg",
-    "color": "#57ab74"
+    "icon": "caritatif.svg",
+    "color": "#502b34"
   },
   "cinema-2": {
     "name": "Cinéma",
     "icon": "video-camera.svg",
-    "color": "#c9ab80"
+    "color": "#1920"
+  },
+  "cinema-3": {
+    "name": "Cinéma",
+    "icon": "video-camera.svg",
+    "color": "#8bbffb"
   },
   "concerts": {
     "name": "Concerts",
-    "icon": "music.svg",
-    "color": "#14cc59"
+    "icon": "undefined.svg",
+    "color": "#db0f14"
   },
   "conferences-debats": {
     "name": "Conférences-Débats",
     "icon": "CONFERENCE.svg",
-    "color": "#18176b"
+    "color": "#548136"
   },
   "courts-sejour-ete": {
     "name": "Courts séjour été",
-    "icon": "undefined.svg",
-    "color": "#b03da"
+    "icon": "camping.svg",
+    "color": "#afac66"
   },
   "culturel": {
     "name": "Culturel",
     "icon": "undefined.svg",
-    "color": "#1576f2"
+    "color": "#eb322e"
   },
   "environnement": {
     "name": "Environnement",
     "icon": "seeding-1.svg",
-    "color": "#4aa692"
+    "color": "#6b2d6a"
   },
   "expositions": {
     "name": "Expositions",
-    "icon": "undefined.svg",
-    "color": "#ed0875"
+    "icon": "expo-1.svg",
+    "color": "#9d0c30"
   },
   "festivals": {
     "name": "Festivals",
-    "icon": "undefined.svg",
-    "color": "#37b0bd"
+    "icon": "festival.svg",
+    "color": "#3da47"
   },
   "festivites": {
     "name": "Festivités",
-    "icon": "undefined.svg",
-    "color": "#99cd04"
+    "icon": "festival.svg",
+    "color": "#8e904c"
   },
   "fete-de-la-musique-1": {
     "name": "Fête de la musique",
-    "icon": "undefined.svg",
-    "color": "#3a2649"
+    "icon": "music.svg",
+    "color": "#474505"
   },
   "feux-dartifice": {
     "name": "feux d'artifice",
     "icon": "fireworks.svg",
-    "color": "#b2a5c6"
+    "color": "#ec65a2"
   },
   "food-drink": {
     "name": "Food &amp; Drink",
     "icon": "undefined.svg",
-    "color": "#454f17"
+    "color": "#d8cbdc"
   },
   "journees-thematiques": {
     "name": "Journées thématiques",
     "icon": "undefined.svg",
-    "color": "#451259"
+    "color": "#e14c0d"
   },
   "marches": {
     "name": "Marchés",
     "icon": "undefined.svg",
-    "color": "#25b4da"
-  },
-  "medical": {
-    "name": "Médical",
-    "icon": "undefined.svg",
-    "color": "#258d12"
+    "color": "#36dfa6"
   },
   "noel-marches": {
     "name": "Noël",
-    "icon": "undefined.svg",
-    "color": "#78f96a"
+    "icon": "snowflake.svg",
+    "color": "#cd21ea"
   },
   "philosophie": {
     "name": "Philosophie",
-    "icon": "undefined.svg",
-    "color": "#880a0f"
+    "icon": "CONFERENCE.svg",
+    "color": "#9a685b"
   },
   "sejours-jumelage": {
     "name": "séjours jumelage",
-    "icon": "undefined.svg",
-    "color": "#3c4467"
+    "icon": "camping.svg",
+    "color": "#124550"
   },
   "sejours-organises": {
     "name": "séjours organisés",
     "icon": "undefined.svg",
-    "color": "#450fdb"
+    "color": "#a9067c"
   },
   "sport": {
     "name": "Sport",
-    "icon": "undefined.svg",
-    "color": "#fd415b"
+    "icon": "evtsportif.svg",
+    "color": "#f51314"
   },
   "uncategorized-1": {
     "name": "Uncategorized",
     "icon": "undefined.svg",
-    "color": "#3ba3b9"
+    "color": "#24d288"
   },
   "vide-dressing": {
     "name": "vide-dressing",
-    "icon": "undefined.svg",
-    "color": "#fb4d14"
+    "icon": "vetements.svg",
+    "color": "#7dbb2f"
   },
   "vide-grenier": {
     "name": "Vide-grenier",
-    "icon": "undefined.svg",
-    "color": "#c4e192"
+    "icon": "brocante.svg",
+    "color": "#95e73b"
   },
-
 
 ///////////////////////////////////
 ///////////////////////////////////
@@ -641,232 +640,232 @@ export let dicoIcons =
 
   "acupuncteur": {
     "name": "Acupuncteur",
-    "icon": "undefined.svg",
-    "color": "#3483dd"
+    "icon": "ying-yang.svg",
+    "color": "#433fe6"
   },
   "allergologue": {
     "name": "Allergologue",
-    "icon": "undefined.svg",
-    "color": "#58b5ab"
+    "icon": "doctor1.svg",
+    "color": "#2c2d36"
   },
   "anesthesiste": {
     "name": "Anésthésiste",
-    "icon": "undefined.svg",
-    "color": "#ef29a3"
+    "icon": "healthcare-1.svg",
+    "color": "#d9c435"
   },
   "architecte": {
     "name": "Architecte",
     "icon": "architect.svg",
-    "color": "#adbc9e"
+    "color": "#f6b4b0"
   },
   "avocat-1": {
     "name": "Avocat",
     "icon": "equilibrar.svg",
-    "color": "#9f1bf5"
+    "color": "#587564"
   },
   "cardiologue": {
     "name": "Cardiologue",
-    "icon": "undefined.svg",
-    "color": "#2b0bd6"
+    "icon": "doctor1.svg",
+    "color": "#45edb7"
   },
   "chiropracteur": {
     "name": "Chiropracteur",
-    "icon": "undefined.svg",
-    "color": "#d551ec"
+    "icon": "ying-yang.svg",
+    "color": "#1efb90"
   },
   "courtier-en-assurances": {
     "name": "Courtier en assurances",
     "icon": "avocat.notaire.svg",
-    "color": "#331833"
+    "color": "#2415d6"
   },
   "dentiste": {
     "name": "Dentiste",
-    "icon": "undefined.svg",
-    "color": "#789c95"
+    "icon": "doctor1.svg",
+    "color": "#eb9951"
   },
   "dermatologue": {
     "name": "Dermatologue",
-    "icon": "undefined.svg",
-    "color": "#53b000"
+    "icon": "doctor1.svg",
+    "color": "#c97a74"
   },
   "dieteticien": {
     "name": "Diététicien",
-    "icon": "undefined.svg",
-    "color": "#813599"
+    "icon": "ying-yang.svg",
+    "color": "#c86e5f"
   },
   "endocrinologue": {
     "name": "Endocrinologue",
-    "icon": "undefined.svg",
-    "color": "#d145d8"
+    "icon": "doctor1.svg",
+    "color": "#992587"
   },
   "etiopathe": {
     "name": "Etiopathe",
-    "icon": "undefined.svg",
-    "color": "#680d74"
+    "icon": "ying-yang.svg",
+    "color": "#7c91de"
   },
   "expert-comptable": {
     "name": "Expert-Comptable",
     "icon": "calculator.svg",
-    "color": "#2dcc59"
+    "color": "#3d5bb9"
   },
   "geometre": {
     "name": "Expert-Géomètre",
     "icon": "compass.svg",
-    "color": "#29345c"
+    "color": "#4838cc"
   },
   "gastro-enterologue": {
     "name": "Gastro-entérologue",
-    "icon": "undefined.svg",
-    "color": "#9a6697"
+    "icon": "doctor1.svg",
+    "color": "#80858f"
   },
   "gynecologue": {
     "name": "Gynécologue-obstétricien",
-    "icon": "undefined.svg",
-    "color": "#7dde99"
+    "icon": "doctor1.svg",
+    "color": "#dad8bc"
   },
   "huissier": {
     "name": "Huissier",
     "icon": "equilibrar.svg",
-    "color": "#49c6d"
+    "color": "#b077a7"
   },
   "hypnotherapeute": {
     "name": "Hypnothérapeute",
-    "icon": "undefined.svg",
-    "color": "#135860"
+    "icon": "psychiatry.svg",
+    "color": "#6060da"
   },
   "infirmier": {
     "name": "Infirmier",
-    "icon": "undefined.svg",
-    "color": "#b0d00f"
+    "icon": "healthcare-1.svg",
+    "color": "#1d9ab7"
   },
   "juridique": {
     "name": "Juridique",
     "icon": "undefined.svg",
-    "color": "#e26d82"
+    "color": "#4cbd4e"
   },
   "kinesitherapeute": {
     "name": "Kinésithérapeute",
-    "icon": "undefined.svg",
-    "color": "#ffa14b"
+    "icon": "doctor1.svg",
+    "color": "#8e7719"
   },
   "generaliste": {
     "name": "Médecin généraliste",
     "icon": "doctor1.svg",
-    "color": "#a74a3d"
+    "color": "#a98be6"
   },
   "medecin-specialiste-1": {
     "name": "Médecin Spécialiste",
     "icon": "doctor1.svg",
-    "color": "#1d1e54"
+    "color": "#d7b1a7"
   },
   "medecine-alternative": {
     "name": "Médecine alternative",
-    "icon": "ying-yang.svg",
-    "color": "#aa9fbe"
+    "icon": "undefined.svg",
+    "color": "#5e5f96"
   },
   "naturopathe": {
     "name": "Naturopathe",
-    "icon": "undefined.svg",
-    "color": "#f09752"
+    "icon": "ying-yang.svg",
+    "color": "#d34a74"
   },
   "neurologue": {
     "name": "Neurologue",
-    "icon": "undefined.svg",
-    "color": "#d8ed27"
+    "icon": "doctor1.svg",
+    "color": "#463711"
   },
   "notaire-1": {
     "name": "Notaire",
     "icon": "avocat.notaire.svg",
-    "color": "#2beda0"
+    "color": "#dcc69a"
   },
   "ophtalmologue": {
     "name": "Ophtalmologue",
-    "icon": "undefined.svg",
-    "color": "#31b54f"
+    "icon": "doctor1.svg",
+    "color": "#2bf587"
   },
   "orthophoniste": {
     "name": "Orthophoniste",
-    "icon": "undefined.svg",
-    "color": "#bd5ad3"
+    "icon": "doctor1.svg",
+    "color": "#edf83a"
   },
   "ostheopathe": {
     "name": "Osthéopathe",
-    "icon": "undefined.svg",
-    "color": "#fbd1a4"
+    "icon": "ying-yang.svg",
+    "color": "#71d687"
   },
   "otorhinolaryngologiste": {
-    "name": "Otorhinolaryngologiste",
-    "icon": "undefined.svg",
-    "color": "#c9d6d9"
+    "name": "Oto rhino laryngologiste",
+    "icon": "doctor1.svg",
+    "color": "#8f6f1d"
   },
   "pediatre": {
     "name": "Pédiatre",
-    "icon": "undefined.svg",
-    "color": "#3f703c"
+    "icon": "doctor1.svg",
+    "color": "#86b87a"
   },
   "pedicure": {
     "name": "Pédicure-Podologue",
-    "icon": "undefined.svg",
-    "color": "#8c839a"
+    "icon": "doctor1.svg",
+    "color": "#f2b2a"
   },
   "pneumologue": {
     "name": "Pneumologue",
-    "icon": "undefined.svg",
-    "color": "#32431d"
+    "icon": "doctor1.svg",
+    "color": "#c174ea"
   },
   "psychanalyste": {
     "name": "Psychanalyste",
-    "icon": "undefined.svg",
-    "color": "#143efb"
+    "icon": "psychiatry.svg",
+    "color": "#7e34ed"
   },
   "psychiatre": {
     "name": "Psychiatre",
-    "icon": "undefined.svg",
-    "color": "#741fb0"
+    "icon": "psychiatry.svg",
+    "color": "#bb9262"
   },
   "psychologie": {
     "name": "Psychologie",
-    "icon": "psychiatry.svg",
-    "color": "#7b414"
+    "icon": "undefined.svg",
+    "color": "#e16334"
   },
   "psychologue": {
     "name": "Psychologue",
-    "icon": "undefined.svg",
-    "color": "#640c1a"
+    "icon": "psychiatry.svg",
+    "color": "#4a667e"
   },
   "psychomotricien": {
     "name": "Psychomotricien",
-    "icon": "undefined.svg",
-    "color": "#ad4d9d"
+    "icon": "psychiatry.svg",
+    "color": "#dd72b2"
   },
   "radiologue": {
     "name": "Radiologue",
-    "icon": "undefined.svg",
-    "color": "#38c27b"
+    "icon": "doctor1.svg",
+    "color": "#a1e5"
   },
   "reflexologue": {
     "name": "Réflexologue",
-    "icon": "undefined.svg",
-    "color": "#a02574"
+    "icon": "ying-yang.svg",
+    "color": "#f9e740"
   },
   "sage-femme": {
     "name": "Sage-Femme",
-    "icon": "undefined.svg",
-    "color": "#4bc6d9"
+    "icon": "healthcare-1.svg",
+    "color": "#dcde14"
   },
   "sante-a-domicile": {
     "name": "Santé à Domicile",
     "icon": "healthcare-1.svg",
-    "color": "#f315ca"
+    "color": "#45e41a"
   },
   "urologue": {
     "name": "Urologue",
-    "icon": "undefined.svg",
-    "color": "#96340e"
+    "icon": "doctor1.svg",
+    "color": "#451"
   },
   "veterinaire": {
     "name": "Vétérinaire",
     "icon": "vaccine-1.svg",
-    "color": "#6bc52"
+    "color": "#7b36c"
   }
 }

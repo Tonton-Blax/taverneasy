@@ -211,8 +211,15 @@
               {#if listItem.tlphone}
               <a href="tel:{listItem.tlphone}"> ☎ {listItem.tlphone}</a>
               {/if}
+              
+              {#each listItem.post_category as tag, index}
+                {#if index < 3}
+                    <div style="font-size:10px;display:inline-block;">#{tag.name}&nbsp;</div>
+                {/if}
+              {/each}
+
             </div>
-          </div> 
+          </div>
 
             <div class="rouvre">
               <div class="sousrouvre-event has-background-primary is-size-5 is-size-7-touch">
@@ -227,7 +234,7 @@
 
         <div class="content padd maxcontent is-size-6 is-only-desktop">
               <p class="has-text-left puce plie">
-                {@html listItem.content.rendered.substring(0,250)}
+               <!-- {@html listItem.content.rendered.substring(0,250)}-->
               </p>        
         </div>
         <button class="button boutoninfo is-warning is-hidden-mobile" on:click={() => openModal(index)}>＋</button>
@@ -626,7 +633,7 @@
     .reveal-text {
       font-size:2em;
     }
-  }
+}
 
 @media screen and (max-width: 768px) {
 
@@ -661,6 +668,7 @@
 
   .is-6-max {
     font-size:12px;
+    max-height:15px;
   }
   .is-8-max {
     font-size:14px;

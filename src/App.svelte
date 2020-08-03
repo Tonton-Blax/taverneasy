@@ -34,14 +34,15 @@ let mapContainer;
 let weather = []
 
 	onMount(async () => {	
-		//localStorage.clear();
+		localStorage.clear();
 		
-		makeCategories("liberales").then((e) => console.log(e));
+		//makeCategories("events").then((e) => console.log(e));
 		$mobileViewport = window.matchMedia("(max-width: 768px)"); 
 		weather = await getWeather();
 		getPlaces("events")
 			.then((p) => { 
 				A = ABackup = p;
+				console.log(p);
 				if (toggle=="events") A = A.sort((a, b) => Date.parse(a.start_date.raw) - Date.parse(b.start_date.raw));
 				isBigArray.set(Array(p.length).fill(false));
 				ready=true;
@@ -86,7 +87,6 @@ let weather = []
 
 			getPlaces(toggle).then((p) => {
 				A = p;
-					console.log(p)
 				if (toggle=="events") A = A.sort((a, b) => Date.parse(a.start_date.raw) - Date.parse(b.start_date.raw));
 				ABackup = A;
 				//console.log(A);

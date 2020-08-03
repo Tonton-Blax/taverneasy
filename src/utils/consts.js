@@ -131,7 +131,7 @@ const URLFORM = 'http://taverneasy.fr/wp-json/contact-form-7/v1/contact-forms/43
     dateIn = new Date(dateIn)
     let diff = Math.ceil((dateIn.getTime() - today.getTime()) / (1000 * 3600 * 24));
     let str = "";
-    console.log("viewport", mob.matches);
+    //console.log("viewport", mob.matches);
     if (!weather || weather == undefined || diff > 13) return "";
 
     if (weather[diff].tmax >= 30) 

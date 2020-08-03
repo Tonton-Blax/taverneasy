@@ -1,10 +1,13 @@
 {
 	"folders": [
 		{
-			"path": "fa"
+			"path": "."
 		},
 		{
-			"path": "style"
+			"path": "utils"
+		},
+		{
+			"path": "subcomp"
 		}
 	]
 }

@@ -6,6 +6,7 @@
 
   // field of each item that's used for the labels in the list
   export let labelFieldName = undefined;
+  export let inputSize;
   export let keywordsFieldName = labelFieldName;
   export let valueFieldName = undefined;
 
@@ -50,6 +51,7 @@
   export let noResultsText = "No results found";
 
   let _placeholder;
+  let resize=false;
 
   onMount(async () => { 
     _placeholder = `${placeholder}`;
@@ -349,19 +351,21 @@
 
   function onDocumentClick(e) {
     if (debug) {
-      console.log("onDocumentClick: " + JSON.stringify(e.target));
+      console.log(e.target);
     }
     if (!e.target.closest(".autocomplete")) {
       if (debug) {
         console.log("onDocumentClick outside");
       }
       placeholder = _placeholder;
+      resize=false;
       close();
     } else {
       // if (debug) {
       //   console.log("onDocumentClick inside");
       // }
       // resetListToAllItemsAndOpen();
+      resize=true;
       highlight();
     }
   }
@@ -385,6 +389,7 @@
       e.preventDefault();
       fn(e);
     }
+    resize=false;
   }
 
   function onKeyPress(e) {
@@ -436,6 +441,7 @@
     }
     placeholder = '';
     resetListToAllItemsAndOpen();
+    resize=true;
   }
 
   function resetListToAllItemsAndOpen() {
@@ -524,6 +530,7 @@
       console.log("onBlur");
     }
     placeholder = _placeholder;
+    resize=false;
     close();
   }
   // 'item number one'.replace(/(it)(.*)(nu)(.*)(one)/ig, '<b>$1</b>$2 <b>$3</b>$4 <b>$5</b>')
@@ -548,7 +555,7 @@
   }
 </script>
 
-<div class="{className} autocomplete select is-fullwidth">
+<div class="{className} autocomplete select is-fullwidth" class:resize>
   <input
     type="text"
     class="input autocomplete-input is-size-6-touch"
@@ -608,12 +615,13 @@
   }
   input.autocomplete-input {
     width: 100%;
-    height: 48px;
+    height: 42px;
     padding: 5px 30px;
     font-weight: 900;
     text-transform: uppercase;
     background:transparent;
     color:white;
+    text-align: center;
   }
 
   .autocomplete-list {
@@ -658,19 +666,31 @@
     margin-top:0px;
   }
 
-  @media screen and (max-width: 768px) {
+  @media screen and (max-width: 1024px) {
     input.autocomplete-input {
-      padding : 18px 25px 18px 5px;
-      max-width:none;
-      height:20px;
-      text-align:center;
+      padding:0;
     }
     .select::after {
-      margin:auto;
+      display:none;
     }
     .autocomplete {
-      max-width:none;
       margin-top:unset;
+      padding: 1px 1px;
+      min-width:unset;
+      position: fixed;
+      top: 73px;
+      right: 20px;
+      width: 42px;
+      height:42px;
+      z-index: 1;
     }
+    .resize {
+      min-width:50vw;
+    }
+    input {
+      width:100%;
+      display:block;
+    }
+    
   }
 </style>  

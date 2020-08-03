@@ -56,6 +56,29 @@
 
 </script>
 
+{#if $mobileViewport.matches}
+
+  <div class="is-size-7-touch">
+    <AutoComplete 
+      items={items}
+      inputSize={"25px"}
+      placeholder =  {'?'}
+      className={"has-background-primary"}
+      labelFieldName="name"
+      bind:selectedItem={$selectedItem}
+      onChange={() => switchData('update')} 
+    />
+
+    {#if $selectedItem.id}
+          <span class="icon is-large iconreset-mobile has-text-warning" on:click={reset}>
+            <i class="fas fa-times-circle"></i>
+          </span>
+          
+    {/if}
+  </div>
+
+{/if}
+
 <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
   <div class="navbar-menu" class:is-active={toggleMenu} >
       <div class="navbar-start">
@@ -73,23 +96,25 @@
             on:click={() => switchData('switch', 'events')}>Evénements</button>
           <hr class="navbar-divider">  
 
-        <div class="navbar-item filtre is-size-7-touch" class:maxwidth={$selectedItem.id}>
-          <AutoComplete 
-            items={items}
-            placeholder =  {`${placeholder[toggle]}recherchez-vous ?`}
-            className={"filtre"}
-            labelFieldName="name"
-            bind:selectedItem={$selectedItem}
-            onChange={() => switchData('update')} 
-          />
+        {#if !$mobileViewport.matches}
+          <div class="navbar-item filtre is-size-7-touch autocomplete-mobile" class:maxwidth={$selectedItem.id}>
+            <AutoComplete 
+              items={items}
+              placeholder =  {`${placeholder[toggle]}recherchez-vous ?`}
+              className={"filtre"}
+              labelFieldName="name"
+              bind:selectedItem={$selectedItem}
+              onChange={() => switchData('update')} 
+            />
 
-          {#if $selectedItem.id}
-                <span class="icon is-large" on:click={reset}>
-                  <i class="fas fa-times-circle"></i>
-                </span>
-                
-          {/if}
-       </div>
+            {#if $selectedItem.id}
+                  <span class="icon is-large" on:click={reset}>
+                    <i class="fas fa-times-circle"></i>
+                  </span>
+                  
+            {/if}
+        </div>
+        {/if}
 
         <div class="navbar-item datemax">
         {#if toggle=="events"}
@@ -117,16 +142,17 @@
         <div class="navbar-item logo is-hidden-mobile"><img src="./logomin.svg" alt="taverneasy" width="auto" height="38px"></div>
       </div>
 </div>
- <div class="navbar-brand">
+  <div class="navbar-brand">
       
 
-      <button role="button" class="navbar-burger burger" class:is-active={toggleMenu} on:click={() => toggleMenu = !toggleMenu} 
-      aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+    <button role="button" class="navbar-burger burger" class:is-active={toggleMenu} on:click={() => toggleMenu = !toggleMenu} 
+    aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
         <span aria-hidden="true"></span>
         <span aria-hidden="true"></span>
         <span aria-hidden="true"></span>
-      </button>
-    </div>
+    </button>
+    
+  </div>
 
 </nav>
 
@@ -190,10 +216,6 @@
   top:5px;
 }
 
-:global(.filtre input) {
-  min-width: 23vw;
-}
-
 :global(::placeholder) {
   color:#555!important;
   bottom: -38%;
@@ -214,48 +236,20 @@ select option {
     min-width:100vmax;
     margin-top:10px;
   }
-
 }
 
-@media screen and (max-width: 768px) {
-  .filtre {
-      top: 0;
-      left:0;    
-  }
-
-  .maxwidth {
-    max-width: 80%;
-  }
-
-  .filtre .icon {
-    position: absolute;
-    top: 5px;
-    right: -15%;
-  }
-
-  .filtre .fas, .datemax .fas {
-    font-size: 24px;
-  }
-
-  .logo {
-    margin-left: initial;
-   }
-
-  .is-active {
-    border:none;
-  }
-  .menuitem-mobile {
-    border: none;
-    font-weight:100;
-    font-size:larger;
-    color:white;
-    text-transform: uppercase;
+@media screen and (max-width: 1024px) {
+  .iconreset-mobile {
+    position: fixed;
+    top: 111px;
+    right: 22px;
+    z-index: 1;
+    transform: scale(2.5);
   }
   .navbar {
     height:0px;
     min-height:0px;
   }
-
   .navbar-divider {
     display: block;
   }
@@ -287,6 +281,41 @@ select option {
   .navbar-start {
     padding-left:0px;
   }
+  
+  .filtre {
+      top: 0;
+      left:0;    
+  }
+
+  .filtre .icon {
+    position: absolute;
+    top: 5px;
+    right: -15%;
+  }
+
+  .filtre .fas, .datemax .fas {
+    font-size: 24px;
+  }
+
+  .maxwidth {
+    max-width: 25vw;
+  }
+
+  .logo {
+    margin-left: initial;
+   }
+
+  .is-active {
+    border:none;
+  }
+  .menuitem-mobile {
+    border: none;
+    font-weight:100;
+    font-size:larger;
+    color:white;
+    text-transform: uppercase;
+  }
+
   .fitcontent {
     width:100%;
     display:flex;

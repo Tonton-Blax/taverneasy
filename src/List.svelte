@@ -225,29 +225,37 @@
 						<p class="subtitle is-6 is-8-max">{listItem.street}</p>
 					</div>
 				</div>
-        {#if toggle!="associations"}
+        
           <Collapse open={openHoraires} >
             <div class="sousrouvre is-size-4 is-size-6-mobile is-primary" slot="trigger">
               <div class="rouvre">
                 <div 
                   on:mouseenter={() => displayPlus = true} on:mouseleave={() => displayPlus = false}
-                  class="sousrouvre has-background-black-ter has-text-white is-size-4 is-size-6-mobile">
+                  class="sousrouvre has-background-black-ter has-text-white is-size-4 is-size-6-mobile">                  
                   
-                  {nextState(index)}
-                  {#if displayPlus}
+                  {#if toggle=="commerces"}
+                    {nextState(index)}
+                  {:else} 
+                    {listItem.post_category[0].name}
+                  {/if}
+
+                  {#if displayPlus && toggle=="commerces"}
                     <span class="icon"><i class="fas fa-plus"></i></span>
                   {/if}
+
                 </div>
               </div>
             </div>
             <div class="notification has-background-white">
               <div class="content horaireslist is-size-7-touch">
-                {@html allHorairesHtml(listItem)}
+                {#if toggle!="associations"}
+                  {@html allHorairesHtml(listItem)}
+                {/if}
               </div>
             </div>
 
           </Collapse>
-        {/if}
+        
       </div>
 
      <div class="content padd is-size-7-touch">
@@ -365,7 +373,7 @@
   }
 
   .plie {
-    max-height:200px;
+    max-height:200px!important;
     height:auto;
     overflow:hidden;
     text-overflow: ellipsis;
@@ -429,7 +437,7 @@
   .boutoninfo {
     position: absolute;
     top: 1rem;
-    right: 2rem;
+    left: 2rem;
     color:white;
   }
 
@@ -670,6 +678,9 @@
       height: unset;
       max-height: unset;
     }
+    .card-content {
+      height: 20vh;
+    }
     .card .media:not(:last-child) {
       margin-bottom:0.5em;
     }
@@ -687,7 +698,7 @@
       margin-bottom:auto;
     }
     .maximagecard {
-      max-height:120px;
+      height:120px;
     }
     .rouvre {
       line-height: 2em;
