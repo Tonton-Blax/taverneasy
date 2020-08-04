@@ -16,7 +16,7 @@
   let defaultCategory;
   let listRef;
   let readMore = [];
-  let today; let tomorrow; let currentTime; let nextStatePlace;
+  let today; let todayDigit; let tomorrow; let currentTime; let nextStatePlace;
   let telephone = false;
   let openHoraires=false;
   let firstTimeUpdate = true;
@@ -29,14 +29,18 @@
 
   let itemTop;
 
-  onMount(async () => {
-    today = new Date();
-    currentTime = `${(today.getUTCHours()-(today.getTimezoneOffset()/60))%24}${today.getUTCMinutes()}`;
+    today = new Date(Date.now());
+    currentTime = `${today.getHours().toString().padStart(2, '0')}${today.getMinutes().toString().padStart(2, '0')}`;
+    
     today = today.getDay();
     today == 7 ? tomorrow = 1 : tomorrow = today +1;
+    todayDigit = today;
     today = dicoDay[today];
     tomorrow = dicoDay[tomorrow];
-    
+
+  onMount(async () => {
+   
+
     let observer = new IntersectionObserver((entries, observer) => { 
       entries.forEach(entry => {
         if(entry.isIntersecting){
@@ -65,30 +69,41 @@
     
   function nextState (index) {
     
-    let lesjours = `business_hours.rendered.days.`;
+    if (!A[index].business_hours) return;
+    
+    const lesjours = `business_hours.rendered.days.`;
+    const avantMidi = getProp(A[index], lesjours+today+'.slots.1.time.0') != undefined ? getProp(A[index], lesjours+today+'.slots.0.time.1') : undefined;
+    const apresMidi = getProp(A[index], lesjours+today+'.slots.1.time.0');
+    const soir = getProp(A[index], lesjours+today+'.slots.1.time.1') == undefined ? getProp(A[index], lesjours+today+'.slots.0.time.1') : getProp(A[index], lesjours+today+'.slots.1.time.1');
+    
     if (getProp(A[index], 'business_hours.rendered.extra.current_label') == 'Closed now')
     {
       // ON CHECKE SI C'EST LE MIDI ET QUAND QUE CA ROUVRE :
-      if (getProp(A[index], lesjours+dicoDay[today]+'.slots.0.time.1') < currentTime 
-      && currentTime < getProp(A[index], lesjours+dicoDay[today]+'.slots.1.time.0')) {
-          nextStatePlace =  getProp(A[index], lesjours+dicoDay[today]+'.slots.1.time.0').splice(2, 0, "H");
+      
+      if ((avantMidi != undefined && apresMidi != undefined) && (currentTime >= avantMidi && currentTime <= apresMidi)) {
+          nextStatePlace =  getProp(A[index], lesjours+today+'.slots.1.time.0').splice(2, 0, "H");
           return (`Ouvre à : ${nextStatePlace}`);
       }
       // SINON ON CHERCHE LE PROCHAIN JOUR/HEURE D'OUVERTURE :
       else
       {
-        for (let i = 0; i <= 7; i++) {
-          if (getProp(A[index], lesjours+dicoDay[i]+'.slots.0.time.length')) {
-              nextStatePlace =  getProp(A[index], lesjours+dicoDay[i]+'.slots.0.time.0').splice(2, 0, "H");
-              return (`Ouvre ${dicoDayFr[i]} à : ${nextStatePlace}`);
+        let delta;
+        for (let i = todayDigit; i <= todayDigit + 7; i++) {
+          
+          i > 7 ? delta = i-7 : delta = i; // On remappe au lundi si > Dimanche
+          
+          if (getProp(A[index], lesjours+dicoDay[delta]+'.slots.0.time.length')) {
+              nextStatePlace =  getProp(A[index], lesjours+dicoDay[delta]+'.slots.0.time.0').splice(2, 0, "H");
+              return (`Ouvre ${dicoDayFr[delta]} à : ${nextStatePlace}`);
               break;
           }
         }
       } 
     }
+    
     else if (getProp(A[index], 'business_hours.rendered.extra.current_label') == 'Open now') 
-      return nextStatePlace = 'Ouvert'
-    else return `Horaires indisponibles`
+      return nextStatePlace = 'Ouvert, Ferme à : ' + ((avantMidi != undefined && currentTime <= avantMidi) && soir != undefined? avantMidi.splice(2, 0, "H") : soir == undefined ? "(non renseigné)" : soir.splice(2,0,'H'));
+    else return toggle != "associations" ? `Horaires indisponibles` : "";
   }
 
 // Update list position si active list item updatée via map
@@ -96,7 +111,7 @@
 
     newActiveListItem => {
       if (listRef) {
-        if ($mobileViewport.matches)
+        if ($mobileViewport.touch.matches)
           listRef.scrollLeft = document.getElementById(`list-item-${newActiveListItem}`).offsetLeft;
         else
             listRef.scrollTop = document.getElementById(`list-item-${newActiveListItem}`).offsetTop - 150;
@@ -154,7 +169,7 @@
             </span>
             {A[currentIndex].phone}
           </a>
-          <a class="panel-block" href={A[currentIndex].website}> 
+          <a class="panel-block" href={A[currentIndex].website ? A[currentIndex].website : '#'}> 
             <span class="panel-icon">
               <i class="fas fa-book circleicon" aria-hidden="true"></i>
             </span>
@@ -201,11 +216,11 @@
     <h1 class="reveal-text">{boutonText[toggle].charAt(0).toUpperCase() + boutonText[toggle].slice(1).toUpperCase()}</h1>
     <div style="margin:30px 0px;"></div>
   </div>
-{#await A then B}
-{#each B as listItem, index}
+
+{#each A as listItem, index}
 
 <div class="list-item" id="list-item-{index}" categorie={listItem.default_category} idplace={index}>
-    <div class="card" class:glowing={index == $activeListItem}>
+    <div class="card" class:glowing={index == $activeListItem || index == $activeMapItem}>
 			<div class="card-image">
 				<figure class="image maximagecard" on:click={() => openModal(index)}>
 					<img src="{listItem.featured_image.src || 'pingouins.jpg'}" alt="Placeholder image">
@@ -289,8 +304,9 @@
   </div>
 </div>
 {/each}
-{/await}
+
 </div>
+
 
 
 <style lang="scss">
@@ -459,19 +475,20 @@
     justify-content: center;
     margin-top:10vh;
     scroll-behavior: smooth;
+    width:100%;
   }
 
   .list-item {
     font-size: 1.2em;
     line-height: 1.5em;
-    width:  25vw;
+    width:  85%;
     margin-bottom:25px;
     border-bottom:none!important;
   }
 
   .glowing {
-    border: 2px solid #b5b5b5;
-    outline: 8px solid #FFC857 !important
+    //border: 2px solid #b5b5b5;
+    border: 8px solid #FFC857 !important
     //box-shadow: 0px 0px 28px 0px #3AB795;
   }
 
@@ -480,7 +497,8 @@
   }
 
   .head {
-    margin: 30px 40px 0 40px;
+    margin: 0 auto;
+    width:85%;
   }
 
 * {
@@ -518,8 +536,7 @@
   border-radius:0px;
 	cursor: default;
   border: 4px solid white;
-  min-width: 25vw;
-  max-width: 50%;
+  width: 100%;
   text-align: center;
 }
 
@@ -659,12 +676,14 @@
       overflow: scroll;
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
-      min-width: 100%;
+      //min-width: 100%;
+      width:100%;
+      padding-left:2vw;
     }
 
     .list-item {
       max-width: none;
-      width: 80vw;
+      width: 85%;
       font-size: 1em;
       margin: 0 15px;
       padding: 0;
@@ -728,11 +747,14 @@
       flex-flow: row wrap;  
     }
   }
+  @media screen and (min-width: 768px) and (max-width: 1024px) {
+   .list-item {
+     width:50%;
+   }
+  }
 
-  @media screen and (min-width: 768px) and (max-width: 1366px) {
-    .list-item {
-      width:50vw;
-    }
+  @media screen and (min-width: 1024px) and (max-width: 1366px) {
+   
   }
 
 </style>

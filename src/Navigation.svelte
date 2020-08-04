@@ -56,28 +56,26 @@
 
 </script>
 
-{#if $mobileViewport.matches}
-
-  <div class="is-size-7-touch">
+{#if $mobileViewport.touch.matches}
+  <div class="is-size-7-touch" class:invisible={$selectedItem.id}>
     <AutoComplete 
       items={items}
-      inputSize={"25px"}
-      placeholder =  {'?'}
+      placeholder =  {'🔍'}
       className={"has-background-primary"}
       labelFieldName="name"
       bind:selectedItem={$selectedItem}
       onChange={() => switchData('update')} 
     />
 
-    {#if $selectedItem.id}
-          <span class="icon is-large iconreset-mobile has-text-warning" on:click={reset}>
-            <i class="fas fa-times-circle"></i>
-          </span>
-          
-    {/if}
   </div>
 
+  {#if $selectedItem.id}
+    <span class="icon is-large iconreset-mobile has-text-warning-light" on:click={reset}>
+      <i class="fas fa-times-circle"></i>
+    </span>
+  {/if}
 {/if}
+
 
 <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
   <div class="navbar-menu" class:is-active={toggleMenu} >
@@ -96,8 +94,8 @@
             on:click={() => switchData('switch', 'events')}>Evénements</button>
           <hr class="navbar-divider">  
 
-        {#if !$mobileViewport.matches}
-          <div class="navbar-item filtre is-size-7-touch autocomplete-mobile" class:maxwidth={$selectedItem.id}>
+        {#if !$mobileViewport.touch.matches}
+          <div class="navbar-item filtre is-size-7-touch" class:maxwidth={$selectedItem.id}>
             <AutoComplete 
               items={items}
               placeholder =  {`${placeholder[toggle]}recherchez-vous ?`}
@@ -239,10 +237,15 @@ select option {
 }
 
 @media screen and (max-width: 1024px) {
+  
+  .invisible {
+    display:none!important;
+  }
+  
   .iconreset-mobile {
     position: fixed;
-    top: 111px;
-    right: 22px;
+    top: 73px;
+    right: 19px;
     z-index: 1;
     transform: scale(2.5);
   }
@@ -265,9 +268,9 @@ select option {
   }
 
   .navbar-brand > .is-active {
-    left: -38%!important;
-    bottom: 3vh!important;
+    bottom: 1vh!important;
     opacity: 1!important;
+    margin:0 auto!important;
   }
 
   .navbar .button {
@@ -370,5 +373,10 @@ select option {
   }
 }
 
+@media screen and (min-width: 1025px) and (max-width: 1480px) {
+  .logo {
+    display:none;
+  }
+}
 
 </style>

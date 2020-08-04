@@ -539,7 +539,7 @@ export let dicoIcons =
   },
   "culturel": {
     "name": "Culturel",
-    "icon": "undefined.svg",
+    "icon": "festival.svg",
     "color": "#eb322e"
   },
   "environnement": {

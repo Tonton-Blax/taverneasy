@@ -271,7 +271,7 @@ const URLFORM = 'http://taverneasy.fr/wp-json/contact-form-7/v1/contact-forms/43
                 tmp.push(obj[i].post_category[x].name);
                 
                 cats.push({
-                  name : `🖹 Catégorie : ${obj[i].post_category[x].name}`,
+                  name : `■ Catégorie : ${obj[i].post_category[x].name}`,
                   slug : obj[i].post_category[x].slug,
                   id : obj[i].default_category,
                   type : 'category'

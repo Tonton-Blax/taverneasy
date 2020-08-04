@@ -24,7 +24,7 @@ export let name = "tavernasso"
 
 let A; let ABackup; // <-- A : Données principales, 95% data des différents lieux
 let ready = false;
-let toggle = "events";
+let toggle = "commerces";
 let reset=false;
 let filtrage=false;
 let fireForm = false;
@@ -34,15 +34,15 @@ let mapContainer;
 let weather = []
 
 	onMount(async () => {	
-		localStorage.clear();
+		//localStorage.clear();
 		
 		//makeCategories("events").then((e) => console.log(e));
-		$mobileViewport = window.matchMedia("(max-width: 768px)"); 
+		$mobileViewport.mob = window.matchMedia("(max-width: 768px)"); 
+		$mobileViewport.touch = window.matchMedia("(max-width: 1024px)"); 
 		weather = await getWeather();
-		getPlaces("events")
+		getPlaces("commerces")
 			.then((p) => { 
 				A = ABackup = p;
-				console.log(p);
 				if (toggle=="events") A = A.sort((a, b) => Date.parse(a.start_date.raw) - Date.parse(b.start_date.raw));
 				isBigArray.set(Array(p.length).fill(false));
 				ready=true;
@@ -247,15 +247,15 @@ let weather = []
 		width:fill-available;
 		width:-webkit-fill-available;
 		width:-moz-fill-available;
-		align-items: center;
-		margin-left:-7em;
+		/*align-items: center;*/
+		margin:0 auto;
 	}
 
 	.rightman {
 		justify-content: space-between;
 		width: 67%;
 		position: absolute;
-		left: 33%;
+		right: 0%;
 		top:7vh;
 	}
 	.smallright {
@@ -349,9 +349,6 @@ let weather = []
 		}
 		.list-item {
 			max-width:100%;
-		}
-		.reveal-text {
-			left:12%;
 		}
 	}
 

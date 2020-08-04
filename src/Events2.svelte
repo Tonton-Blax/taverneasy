@@ -1,8 +1,9 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { scale } from 'svelte/transition';
-  import { dicoClass, getProp, animate, dicoDay, writeWeather, getWeather, timeState } from './utils/consts.js';
+  import { dicoClass, getProp, animate, dicoDay, writeWeather, getWeather, timeState, getDefaultCategory } from './utils/consts.js';
   import { activeListItem, activeMapItem, selectedItem, mobileViewport } from './stores.js';
+  import {dicoIcons} from './utils/categories.js'
   import Modal from './subcomp/Modal.svelte'
   import Draggableframes from "./subcomp/Draggableframes.svelte";
   import DropDown from "./subcomp/DropDown.svelte";
@@ -66,7 +67,7 @@
 
     newActiveListItem => {
         if (listRef) {
-          if ($mobileViewport.matches)
+          if ($mobileViewport.touch.matches)
            listRef.scrollTop = document.getElementById(`list-item-${newActiveListItem}`).offsetTop - 50; 
           else 
             listRef.scrollTop = document.getElementById(`list-item-${newActiveListItem}`).offsetTop - 350; 
@@ -177,7 +178,7 @@
 
   <div class="timeline-item is-warning" id="list-item-{index}" categorie={listItem.default_category} idplace={index}>
     <div class="timeline-marker is-warning">
-    <div class="marker-text is-size-6-touch is-size-3" style="line-height:1.2em;">
+    <div class="marker-text is-size-6-mobile is-size-3-tablet is-size-3" style="line-height:1.2em;">
       
       {timeState(listItem.start_date.raw, listItem.end_date.raw)}<br>
       <p class="is-size-6 is-size-7-touch">{@html writeWeather(listItem.start_date.raw)}</p>
@@ -186,7 +187,7 @@
     <div class="timeline-content">
 
   <div class="list-item">
-      <div class="card is-horizontal" class:glowing={index == $activeListItem}>
+      <div class="card is-horizontal" class:glowing={index == $activeListItem ||index == $activeMapItem}>
         <div class="card-image">
           <div class="image is-pointer">
             <img src="{listItem.featured_image.src || './imageavenir.jpg'}" alt="Placeholder image" on:click={() => openModal(index)} >
@@ -199,22 +200,22 @@
               <figure class="image picto">
                 {#each listItem.post_category as cat, index}
                   {#if (cat.id == listItem.default_category)}
-                      <img src={`./svg/${setDefaultCategory(index, cat.slug)}.svg`} alt="Placeholder image">  
+                      <img src={dicoIcons[getDefaultCategory(listItem)] ? "./svg/cat/"+dicoIcons[getDefaultCategory(listItem)].icon : './svg/cat/undefined.svg'} alt="Placeholder image">  
                     {/if}
                   {/each} 
               </figure>            
             </div>
 
             <div class="media-content">
-              <p class="title is-4 is-6-max">{@html listItem.title.rendered.replace("**","<br>")}</p>
-              <p class="subtitle is-6 is-8-max is-size-7-touch">{listItem.street.split(",")[0]}</p>
+              <p class="title is-4 is-6-max">{@html listItem.title.rendered.trim().replace("**","<br>")}</p>
+              <p class="subtitle is-6 is-8-max is-size-7-touch">{listItem.street.split(",")[0].trim()}</p>
               {#if listItem.tlphone}
               <a href="tel:{listItem.tlphone}"> ☎ {listItem.tlphone}</a>
               {/if}
               
               {#each listItem.post_category as tag, index}
                 {#if index < 3}
-                    <div style="font-size:10px;display:inline-block;">#{tag.name}&nbsp;</div>
+                    <div class="tags-events">#{tag.name}&nbsp;</div>
                 {/if}
               {/each}
 
@@ -280,16 +281,17 @@
     top:10rem;
   }
    .timeline .timeline-item {
-     margin-left:34em;
+     justify-content: flex-start;
    }
   
   .timeline {    
     display: flex;
     flex-wrap: wrap;
     overflow: scroll;
-    margin-top:auto;
-    margin-left: -34em;
+    margin: 0 auto;
+    width:100%;
     scroll-behavior: smooth;
+    align-content: center;
   }
 
   #list-items {
@@ -325,7 +327,7 @@
     width:20vw;
     height:auto;
   }
-
+/*
   .card {
     height: 32vh;
     width: 47vw;
@@ -333,7 +335,13 @@
     overflow:hidden;
     transition: all 0.3s ease-out;
   }
-
+*/
+  .card.is-horizontal {
+    display: flex;
+    height: 34vh;
+    width: 47vw;
+    transition: all 0.4s ease-out;
+  }
   .card-image {
     display: flex;
     position: relative;
@@ -353,9 +361,6 @@
     height: webkit-fill-available;
   }
 
-  .card.is-horizontal {
-    display: flex;
-  }
   .card.is-horizontal .card-image {
     height: auto;
   }
@@ -462,6 +467,11 @@
     font-size: unset!important;
   }
 
+  .tags-events {
+    display:inline-block;
+    font-size:14px;
+  }
+
   .padd {
     padding:5px 1.5rem!important;
     max-height: 0;    
@@ -490,8 +500,7 @@
   }
 
   .head {
-    margin: unset;
-    margin-left: 32em;
+    margin: 0 auto;
   }
 
 
@@ -629,16 +638,22 @@
      width: 4em;
 }
 
-@media screen and (min-width: 768px) and (max-width: 1366px) {
-    .reveal-text {
-      font-size:2em;
-    }
-}
+@media screen and (max-width: 1024px) {
+  
+  .reveal-text {
+    font-size:2em;
+  }
 
-@media screen and (max-width: 768px) {
+  .card.is-horizontal {
+    display: flex;
+    width:63vw;
+    height:55vw;
+  }
 
   .timeline {
-    margin-left:-26em;
+    padding-right:14px;
+    align-content:flex-end;
+    padding-bottom:16vh!important;
   }
   .timeline .timeline-item::before {
     left:0.7rem;
@@ -650,6 +665,8 @@
   .timeline .timeline-item .timeline-marker {
     left: 0.7rem;
     top: 5rem;
+    width:24px!important;
+    height:24px!important;
   }
 
   .marker-text {
@@ -658,52 +675,57 @@
     top:4vh;
   }
 
-  .card {
-    width:67vw;
-  }
-
   .rouvre {
     margin:0;
   }
 
-  .is-6-max {
-    font-size:12px;
-    max-height:15px;
-  }
-  .is-8-max {
-    font-size:14px;
-  }
-  .media * {
-    overflow: hidden;
-  }
-  
   .sousrouvre-event {
     padding: 2px;
     line-height: 15px;
+    font-size:9px!important;
   }
-}
-
-@media screen and (max-width: 1215px) {
-  
-  .is-only-desktop {
+  .media-content {
+    line-height:1em;
+    margin-top:-1em;
+  }
+  .tags-events {
+    font-size:10px;
+  }
+  .subtitle {
     display:none;
   }
+  .title {
+    font-size:10px;
+  }
+  .card-footer * {
+    font-size: 10px!important;
+  }
+  
+}
+
+
+@media screen and (min-width: 768px) and (max-width: 1650px) {
+  
   .sousrouvre-event {
-    font-size:12px;
+    font-size:12px!important;
+  }
+  .is-only-desktop {
+    display:none;
   }
   .rouvre {
     padding:0px;
     line-height:1.5em
   }
-  .timeline-marker {
-    width:24px!important;
-    height:24px!important;
-  }
+
   .modalfooter { 
     flex-direction: column;
     max-height: unset;
     line-height:0.5em;
   }
+  .is-6-max {
+    font-size:14px!important;
+  }
+
 }
 
 </style>

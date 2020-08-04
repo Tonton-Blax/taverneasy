@@ -1,12 +1,14 @@
+
 <svelte:window on:click={onDocumentClick} />
 <script>
+
   // the list of items  the user can select from
   import { onMount } from 'svelte'
   export let items;
 
+
   // field of each item that's used for the labels in the list
   export let labelFieldName = undefined;
-  export let inputSize;
   export let keywordsFieldName = labelFieldName;
   export let valueFieldName = undefined;
 
@@ -52,6 +54,7 @@
 
   let _placeholder;
   let resize=false;
+
 
   onMount(async () => { 
     _placeholder = `${placeholder}`;
@@ -374,7 +377,7 @@
     if (debug) {
       console.log("onKeyDown");
     }
-
+    resize=true;
     let key = e.key;
     if (key === "Tab" && e.shiftKey) key = "ShiftTab";
     const fnmap = {
@@ -389,7 +392,6 @@
       e.preventDefault();
       fn(e);
     }
-    resize=false;
   }
 
   function onKeyPress(e) {
@@ -399,6 +401,7 @@
 
     if (e.key === "Enter") {
       e.preventDefault();
+      resize = true;
       selectItem();
     }
   }
@@ -555,10 +558,10 @@
   }
 </script>
 
-<div class="{className} autocomplete select is-fullwidth" class:resize>
+<div class="{className} autocomplete select is-fullwidth" class:resize class:less-opaque={ !resize }>
   <input
     type="text"
-    class="input autocomplete-input is-size-6-touch"
+    class="input autocomplete-input is-size-6-touch fas fa-search" class:empty={!resize}
     {placeholder}
     {name}
     {disabled}
@@ -600,7 +603,9 @@
 </div>
 
 <style lang="scss">
-
+  * {
+    font-family:inherit;
+  }
   *::placeholder {
     color:#ccc!important;
   }
@@ -615,13 +620,17 @@
   }
   input.autocomplete-input {
     width: 100%;
-    height: 42px;
+    height: 48px;
     padding: 5px 30px;
     font-weight: 900;
     text-transform: uppercase;
     background:transparent;
     color:white;
     text-align: center;
+  }
+
+  input {
+    height:48px;
   }
 
   .autocomplete-list {
@@ -669,7 +678,10 @@
   @media screen and (max-width: 1024px) {
     input.autocomplete-input {
       padding:0;
+      height:42px;
+      border:0px;
     }
+    
     .select::after {
       display:none;
     }
@@ -683,14 +695,34 @@
       width: 42px;
       height:42px;
       z-index: 1;
+      transition: all 0.3s ease-out;
+    }
+    .less-opaque {
+      opacity:0.8;
+    }
+    .autocomplete-list-item * {
+      opacity:1!important;
+    }
+    .autocomplete-list-item {
+      line-height: 1.5em;
+      font-size: 12px;
+      font-weight: 500;
     }
     .resize {
-      min-width:50vw;
+      min-width:60vw;
     }
     input {
       width:100%;
       display:block;
     }
-    
+    .autocomplete * {
+      transition: all 0.3s ease-out;
+    }
+    .empty {
+     /* font-family: "fontawesome";*/
+      font-style: normal;
+      font-weight: normal;
+      text-decoration: inherit;
+    }    
   }
 </style>  
