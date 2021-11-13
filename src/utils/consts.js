@@ -31,7 +31,8 @@ let eventsItems;
 let items = {associations : [], commerces : [], liberales : []};
 let weather;
 
-const API = 'https://www.taverneasy.fr/wordpress/';
+//const API = 'http://192.168.1.142:8080/index.php/';
+const API = 'http://82.64.142.108:8080/index.php/';
 /*
 const WEATHERAPIKEY = "67cb859c2dcbc7136d2e382637f0aa80";
 const WEATHERAPIID = "2973258";
@@ -403,7 +404,7 @@ export function allHoraires (jason, toggle) {
 }
 
 export async function makeCategories (slug) {
-  const res = await axios(`https://www.taverneasy.fr/wordpress/wp-json/geodir/v2/${slug}/categories${OPTIONS}`);
+  const res = await axios(`http://192.168.1.142:8080/wp-json/geodir/v2/${slug}/categories${OPTIONS}`);
   let h = res.data;
   let r = {};
 
