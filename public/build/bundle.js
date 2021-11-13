@@ -3107,7 +3107,7 @@ var app = (function () {
     let weather;
 
     //const API = 'http://192.168.1.142:8080/index.php/';
-	const API = 'http://82.64.142.108:8080/index.php/';
+	const API = 'https://taverneasy.hopto.org:8080/index.php/';
     const WEATHERAPI = "https://api.meteo-concept.com/api/forecast/daily?token=1300b78552501da2240c9dddcd4762f078377305f9ca1b28c4b3f02699f76b5e&insee=95607";
 
     const COMMERCES = 'wp-json/geodir/v2/commerces';
