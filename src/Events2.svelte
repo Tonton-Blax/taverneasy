@@ -179,9 +179,10 @@
   <div class="timeline-item is-warning" id="list-item-{index}" categorie={listItem.default_category} idplace={index}>
     <div class="timeline-marker is-warning">
     <div class="marker-text is-size-6-mobile is-size-3-tablet is-size-3" style="line-height:1.2em;">
-      
-      {timeState(listItem.start_date.raw, listItem.end_date.raw)}<br>
-      <p class="is-size-6 is-size-7-touch">{@html writeWeather(listItem.start_date.raw)}</p>
+      {#if listItem.start_date?.raw}
+        {timeState(listItem.start_date?.raw, listItem.end_date?.raw)}<br>
+        <p class="is-size-6 is-size-7-touch">{@html writeWeather(listItem.start_date.raw)}</p>
+      {/if}
     </div>
     </div>
     <div class="timeline-content">
@@ -224,10 +225,10 @@
 
             <div class="rouvre">
               <div class="sousrouvre-event has-background-primary is-size-5 is-size-7-touch">
-                {#if listItem.start_date.rendered != listItem.end_date.rendered}
-                  Du {listItem.start_date.rendered} au {listItem.end_date.rendered}
+                {#if listItem.start_date?.rendered != listItem.end_date?.rendered}
+                  Du {listItem.start_date?.rendered} au {listItem.end_date?.rendered}
                 {:else}
-                  Le {listItem.start_date.raw.split("-").reverse().join("/")} de {listItem.start_time.raw} à {listItem.end_time.raw}
+                  Le {listItem.start_date?.raw.split("-").reverse().join("/")} de {listItem.start_time?.raw} à {listItem.end_time?.raw}
                 {/if}
               </div>
             </div>

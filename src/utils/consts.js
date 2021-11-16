@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 Date.prototype.getWeek = function(){
 
   var day_miliseconds = 86400000,
@@ -20,19 +22,17 @@ String.prototype.splice = function(startIndex,length,insertString) {
   return this.substring(0,startIndex) + insertString + this.substring(startIndex + length);
 };
 
-import axios from 'axios';
 //let categories;
 
 let commerces;
-let associations;
+let places;
 let events;
 let liberales;
 let eventsItems;
-let items = {associations : [], commerces : [], liberales : []};
+let items = {places : [], commerces : [], liberales : []};
 let weather;
 
 //const API = 'http://192.168.1.142:8080/index.php/';
-const API = 'https://maximeredval.fr/wp/';
 /*
 const WEATHERAPIKEY = "67cb859c2dcbc7136d2e382637f0aa80";
 const WEATHERAPIID = "2973258";
@@ -41,15 +41,15 @@ const WEATHERAPI = "api.openweathermap.org/data/2.5/weather?id=2973258"
 
 const WEATHERAPIKEY = "1300b78552501da2240c9dddcd4762f078377305f9ca1b28c4b3f02699f76b5e";
 const WEATHERAPI = "https://api.meteo-concept.com/api/forecast/daily?token=1300b78552501da2240c9dddcd4762f078377305f9ca1b28c4b3f02699f76b5e&insee=95607"
-
-const COMMERCES = 'wp-json/geodir/v2/commerces';
+export const API = 'https://maximeredval.fr/wp/';
+export const COMMERCES = 'wp-json/geodir/v2/commerces';
 const EVENTS = 'wp-json/geodir/v2/events';
 const ASSOS = 'wp-json/geodir/v2/places'
 const LIBERALES = 'wp-json/geodir/v2/liberales'
 //const ASSOSCAT = 'wp-json/geodir/v2/places/categories'
 const COMMERCESCAT = 'wp-json/geodir/v2/commerces/categories'
-const OPTIONS = `?per_page=100`;
-const URLFORM = 'http://taverneasy.fr/wp-json/contact-form-7/v1/contact-forms/430/feedback'
+const OPTIONS = `?per_page=10`;
+const URLFORM = 'http://maximeredval.fr/wp/wp-json/contact-form-7/v1/contact-forms/430/feedback'
 
   export let dicoDay = {
     1 : 'Mo',
@@ -160,30 +160,16 @@ const URLFORM = 'http://taverneasy.fr/wp-json/contact-form-7/v1/contact-forms/43
   }
 
 
-  export async function getPlaces (placeType) {
+  export async function getPlaces (placeType, options) {
     switch (placeType) {
-      case "commerces": return await getCommerces(); 
-      case "associations": return await getAssos(); 
-      case "events": return await getEvents();
-      case "liberales": return await getLiberales();
+      case "commerces": return await getCommerces(options); 
+      case "places": return await getAssos(options); 
+      case "events": return await getEvents(options);
+      case "liberales": return await getLiberales(options);
       default : throw new Error ("Merci de passer un type de structure correc")
     }
   }
-
-  async function getCommerces (options) {
     
-    if (!commerces) {
-      if (!getWithExpiry('localcommerces')) {
-        const res = await axios(`${API}${COMMERCES}${options || OPTIONS}`);
-        commerces = res.data;
-        commerces = commerces.sort((a,b) => (a.title.raw > b.title.raw) ? 1 : ((b.title.raw > a.title.raw) ? -1 : 0))
-        setWithExpiry('localcommerces', res.data, 900000);
-        return commerces;
-      } else return commerces = getWithExpiry('localcommerces');
-    }
-    else return commerces;
-  }
-
   async function getLiberales (options) {
     
     if (!liberales) {
@@ -199,16 +185,16 @@ const URLFORM = 'http://taverneasy.fr/wp-json/contact-form-7/v1/contact-forms/43
   }
 
   async function getAssos (options) {
-    if (!associations) {
+    if (!places) {
       if (!getWithExpiry('localassos')) {
         const res = await axios(`${API}${ASSOS}${options || OPTIONS}`);
-        associations = res.data;
-        associations = associations.sort((a,b) => (a.title.raw > b.title.raw) ? 1 : ((b.title.raw > a.title.raw) ? -1 : 0))
+        places = res.data;
+        places = places.sort((a,b) => (a.title.raw > b.title.raw) ? 1 : ((b.title.raw > a.title.raw) ? -1 : 0))
         setWithExpiry('localassos', res.data, 900000);
-        return associations;
-      } else return associations = getWithExpiry('localassos');
+        return places;
+      } else return places = getWithExpiry('localassos');
     }
-    else return associations;
+    else return places;
   }
 
   async function getEvents (options) {
@@ -258,7 +244,7 @@ const URLFORM = 'http://taverneasy.fr/wp-json/contact-form-7/v1/contact-forms/43
   }
 
   export function getItems (obj, toggle) {
-    if ((!items.associations.length && toggle=="associations") || (!items.commerces.length && toggle=="commerces")) {
+    if ((!items.places.length && toggle=="places") || (!items.commerces.length && toggle=="commerces")) {
       items[toggle] = [];
     
       let cats = []; let tmp = [];
@@ -431,32 +417,31 @@ export function getDefaultCategory (item) {
   
 }
 
-function setWithExpiry(key, value, ttl) {
-  const now = new Date()
-  
-  // `item` is an object which contains the original value
-  // as well as the time when it's supposed to expire
+export function setWithExpiry(key, value, ttl) {
+  const now = new Date()  
 	const item = {
 		value: value,
 		expiry: now.getTime() + ttl
 	}
-	localStorage.setItem(key, JSON.stringify(item))
+	sessionStorage.setItem(key, JSON.stringify(item))
+  console.log("from setWith")
 }
 
-function getWithExpiry(key) {
+export function getWithExpiry(key) {
 	const itemStr = localStorage.getItem(key)
 	// if the item doesn't exist, return null
 	if (!itemStr) {
 		return null
 	}
+  console.log("from getWithExpiry", item)
 	const item = JSON.parse(itemStr)
 	const now = new Date()
 	// compare the expiry time of the item with the current time
 	if (now.getTime() > item.expiry) {
 		// If the item is expired, delete the item from storage
 		// and return null
-		localStorage.removeItem(key)
-		return null
+		//sessionStorage.removeItem(key)
+		//return null
 	}
 	return item.value
 }

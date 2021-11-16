@@ -2,8 +2,7 @@
 	import { getContext } from 'svelte';
 	import { mapbox, key } from '../mapbox.js';
 	import { onMount, createEventDispatcher } from 'svelte';
-	import { activeListItem, activeMapItem, isBigArray, isScrolling } from '../stores.js';
-
+	import { isScrolling } from '../stores.js';
 
 	const { getMap } = getContext(key);
 	const mapMax = getMap();
@@ -36,8 +35,6 @@
 	function handleMarkerClick () {
 		$isScrolling = true;
 		dispatch('updateListPlease', {state:index});
-		$isBigArray = [];
-		$isBigArray[index] = true;
 	}
 
 </script>
@@ -45,7 +42,6 @@
 <div bind:this={markerdiv} 
 	class="circle-background" 
 	style="background-color:{bgColor}" 
-	class:isbig={$isBigArray[index]}
 	on:click={() => handleMarkerClick()} >
 
 	<div class="picto" 
@@ -62,7 +58,7 @@
 		<p class="is-size-5 has-text-weight-bold has-text-warning {titleColor}">
 			{currentStatus}
 		</p> 
-		{#if horaires != "undefined"}
+		{#if horaires !== "undefined"}
 			{@html horaires}
 		{/if}
 	</span>

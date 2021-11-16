@@ -23,7 +23,7 @@
   let active = false; let currentIndex; let currentTitle; let bigify = false; let bigImageIndex;
   let displayPlus = false;
   
-  const boutonText = {"associations" : "associations", "commerces" : "commerces", "liberales" : "Prof. libérales"};
+  const boutonText = {"places" : "associations", "commerces" : "commerces", "liberales" : "Prof. libérales"};
   const dicoHorairesCouleur= {"Open now" : "#703688", "Closed now" : "#ff7518", "null" : "#e74c3c"}
   const dicoDayFr = {1 : 'Lundi', 2 : 'Mardi', 3 : 'Mercredi', 4 : 'Jeudi', 5 : 'Vendredi', 6 : 'Samedi', 7 : 'Dimanche'};
 
@@ -103,7 +103,7 @@
     
     else if (getProp(A[index], 'business_hours.rendered.extra.current_label') == 'Open now') 
       return nextStatePlace = 'Ouvert, Ferme à : ' + ((avantMidi != undefined && currentTime <= avantMidi) && soir != undefined? avantMidi.splice(2, 0, "H") : soir == undefined ? "(non renseigné)" : soir.splice(2,0,'H'));
-    else return toggle != "associations" ? `Horaires indisponibles` : "";
+    else return toggle != "places" ? `Horaires indisponibles` : "";
   }
 
 // Update list position si active list item updatée via map
@@ -185,7 +185,7 @@
           <div class="pingouin is-size-6-touch">
             {@html A[currentIndex].specialdescription || A[currentIndex].content.rendered}
           </div>
-          {#if allHorairesHtml(A[currentIndex], "is-fullwidth") != "undefined" && toggle!="associations"}
+          {#if allHorairesHtml(A[currentIndex], "is-fullwidth") != "undefined" && toggle!="places"}
             <div class="modalhoraires is-size-6-mobile" style="float:left">
               <h2 class="title is-2" style="margin-top:15px;">Les horaires</h2>
               {@html allHorairesHtml(A[currentIndex], "is-fullwidth")}
@@ -200,7 +200,7 @@
     <span slot="footer" class="card-footer">
         <p class="card-footer-item is-size-6 has-background-primary has-text-white">
           <i class="fas fa-calendar-alt"></i>&nbsp; &nbsp; {A[currentIndex].street}</p>
-        {#if toggle!="associations"}
+        {#if toggle!="places"}
         <p class="card-footer-item is-size-6 has-background-info has-text-white is-hidden-mobile">
           <i class="fas fa-clock"></i>&nbsp; &nbsp; {dicoraireCouleurs[getProp(A[currentIndex],'business_hours.rendered.extra.current_label')].fr}</p>
         {/if}
@@ -216,6 +216,7 @@
     <h1 class="reveal-text">{boutonText[toggle].charAt(0).toUpperCase() + boutonText[toggle].slice(1).toUpperCase()}</h1>
     <div style="margin:30px 0px;"></div>
   </div>
+
 
 {#each A as listItem, index}
 
@@ -251,7 +252,7 @@
                   {#if toggle=="commerces"}
                     {nextState(index)}
                   {:else} 
-                    {listItem.post_category[0].name}
+                    {listItem.post_category[0]?.name}
                   {/if}
 
                   {#if displayPlus && toggle=="commerces"}
@@ -263,7 +264,7 @@
             </div>
             <div class="notification has-background-white">
               <div class="content horaireslist is-size-7-touch">
-                {#if toggle!="associations"}
+                {#if toggle!="places"}
                   {@html allHorairesHtml(listItem)}
                 {/if}
               </div>

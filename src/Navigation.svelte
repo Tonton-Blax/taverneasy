@@ -1,11 +1,9 @@
 <script>
-
-  import { activeListItem, activeMapItem, selectedItem, mobileViewport } from './stores.js';
+  import { selectedItem, mobileViewport } from './stores.js';
   import AutoComplete from "./subcomp/Autocomplete.svelte";  
-  import { createEventDispatcher, onMount, onDestroy } from 'svelte';
+  import { createEventDispatcher, onMount, tick } from 'svelte';
   import { getItems, getEventsItems } from './utils/consts';  
   import {Datepicker} from 'svelma-pro'
-  import { fly } from 'svelte/transition';
 
   export let toggle = "commerces";
   export let A = [];
@@ -17,14 +15,21 @@
   let pickerResult;
   let filtreDateIsOn = false;
 
-  let placeholder = {"commerces" : "Quel commerce ", "events" : "Quel événement ", "liberales" : "Quelle profession ", "associations" : "Quelle association "  };
+  let placeholder = {"commerces" : "Quel commerce ", "events" : "Quel événement ", "liberales" : "Quelle profession ", "places" : "Quelle association "  };
 
-  $: toggle == 'events' ? items = getEventsItems(A) : items = getItems(A, toggle);
+  $: toggle === 'events' ? items = getEventsItems(A) : A.length && refresh();
 
   onMount(async () => {
-      if (!items)
-        items = getItems(A, toggle);
+    await refresh();
   });
+
+  let refresh = async () => {
+    await tick();
+    if (!items && A && A.length) {
+        console.log("from NAV :: ",A)
+        items = getItems(A, toggle);
+      }
+  }
 
   // DATA SWITCH /////////////////////////////////////////////////////////////
 	function switchData(text, mode) {
@@ -64,7 +69,7 @@
       className={"has-background-primary"}
       labelFieldName="name"
       bind:selectedItem={$selectedItem}
-      onChange={() => switchData('update')} 
+      on:update={() => switchData('update')} 
     />
 
   </div>
@@ -85,11 +90,13 @@
             on:click={() => switchData('switch', 'commerces')} disabled={toggle=='commerces'} >Commerces</button>
           <hr class="navbar-divider">
           <button class="button navbar-item is-size-6 is-warning is-outlined menuitem-mobile" 
-            on:click={() => switchData('switch', 'associations')} disabled={toggle=='associations'} >Associations</button>
+            on:click={() => switchData('switch', 'places')} disabled={toggle=='places'} >Associations</button>
           <hr class="navbar-divider">
+          <!--
           <button class="button navbar-item is-size-6 is-warning is-outlined menuitem-mobile" 
             on:click={() => switchData('switch', 'liberales')} disabled={toggle=='liberales'} >Prof. libérales</button>
           <hr class="navbar-divider">  
+          -->
           <button class="button navbar-item is-size-6 is-warning is-outlined menuitem-mobile" disabled={toggle=='events'}
             on:click={() => switchData('switch', 'events')}>Evénements</button>
           <hr class="navbar-divider">  
@@ -102,7 +109,7 @@
               className={"filtre"}
               labelFieldName="name"
               bind:selectedItem={$selectedItem}
-              onChange={() => switchData('update')} 
+              on:update={() => switchData('update')} 
             />
 
             {#if $selectedItem.id}

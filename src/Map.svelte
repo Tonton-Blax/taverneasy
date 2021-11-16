@@ -5,7 +5,7 @@
 <script>
 
   import Marker from "./subcomp/Marker.svelte"
-  import { activeListItem, activeMapItem, selectedItem, isBigArray, isScrolling } from './stores.js';
+  import { activeListItem, activeMapItem, selectedItem, isScrolling } from './stores.js';
   import { createEventDispatcher, onMount, onDestroy, setContext } from 'svelte';
   import { dicoClass, dicoColor, dicoDayFr, getProp, allHorairesHtml, dicoraireCouleurs, getDefaultCategory } from './utils/consts';  
   import {dicoIcons} from './utils/categories.js'
@@ -14,7 +14,7 @@
 
   let container;
   let items;
-  let placeHolder = 'http://taverneasy.fr/wordpress/wp-content/uploads/2020/04/penguin.jpg/penguin.jpg';
+  let placeHolder = 'http://maximeredval.fr/wp/wordpress/wp-content/uploads/2020/04/penguin.jpg/penguin.jpg';
   const dispatch = createEventDispatcher();
   let mapMax;
   let elements = [];
@@ -93,14 +93,12 @@
   }
     
   const unsubscribeActiveMapItem = activeMapItem.subscribe(newActiveMapItem => {
-    $isBigArray = [];
     if (mapMax &&!$isScrolling) {
       mapMax.flyTo({
         center: [getProp(A[newActiveMapItem], "longitude") || DEFAULTLON, getProp(A[newActiveMapItem], "latitude") || DEFAULTLAT ],
         zoom:17
       });
 
-      $isBigArray[newActiveMapItem] = true;
     }
     resetScroll()
   });
@@ -118,7 +116,7 @@
             toggle == "commerces" ?
               dicoraireCouleurs[getProp(M,'business_hours.rendered.extra.current_label')].fr :
               toggle == "events" ?
-              M.start_date.rendered : ""
+              M.start_date?.rendered : ""
           }
         svgmask={dicoIcons[getDefaultCategory(M)] ? dicoIcons[getDefaultCategory(M)].icon : 'undefined.svg'}
         bgColor = {dicoIcons[getDefaultCategory(M)] ? dicoIcons[getDefaultCategory(M)].color : "#FFF" }

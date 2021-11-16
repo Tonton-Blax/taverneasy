@@ -1013,61 +1013,6 @@ var app = (function () {
         }
     }
 
-    const subscriber_queue = [];
-    /**
-     * Create a `Writable` store that allows both updating and reading by subscription.
-     * @param {*=}value initial value
-     * @param {StartStopNotifier=}start start and stop notifications for subscriptions
-     */
-    function writable(value, start = noop) {
-        let stop;
-        const subscribers = new Set();
-        function set(new_value) {
-            if (safe_not_equal(value, new_value)) {
-                value = new_value;
-                if (stop) { // store is ready
-                    const run_queue = !subscriber_queue.length;
-                    for (const subscriber of subscribers) {
-                        subscriber[1]();
-                        subscriber_queue.push(subscriber, value);
-                    }
-                    if (run_queue) {
-                        for (let i = 0; i < subscriber_queue.length; i += 2) {
-                            subscriber_queue[i][0](subscriber_queue[i + 1]);
-                        }
-                        subscriber_queue.length = 0;
-                    }
-                }
-            }
-        }
-        function update(fn) {
-            set(fn(value));
-        }
-        function subscribe(run, invalidate = noop) {
-            const subscriber = [run, invalidate];
-            subscribers.add(subscriber);
-            if (subscribers.size === 1) {
-                stop = start(set) || noop;
-            }
-            run(value);
-            return () => {
-                subscribers.delete(subscriber);
-                if (subscribers.size === 0) {
-                    stop();
-                    stop = null;
-                }
-            };
-        }
-        return { set, update, subscribe };
-    }
-
-    const activeListItem = writable(0);
-    const activeMapItem = writable(0);
-    let selectedItem = writable({id:0, name:"",slug:"",type:"",index:0});
-    let isBigArray = writable(0);
-    let mobileViewport = writable({mob:0, touch:0});
-    let isScrolling = writable(0);
-
     function cubicInOut(t) {
         return t < 0.5 ? 4.0 * t * t * t : 0.5 * Math.pow(2.0 * t - 2.0, 3.0) + 1.0;
     }
@@ -3096,26 +3041,12 @@ var app = (function () {
     String.prototype.splice = function(startIndex,length,insertString) {
       return this.substring(0,startIndex) + insertString + this.substring(startIndex + length);
     };
-    //let categories;
-
-    let commerces;
-    let associations;
-    let events;
-    let liberales;
     let eventsItems;
-    let items = {associations : [], commerces : [], liberales : []};
+    let items = {places : [], commerces : [], liberales : []};
     let weather;
-
-    //const API = 'http://192.168.1.142:8080/index.php/';
-    const API = 'https://maximeredval.fr/wp/';
     const WEATHERAPI = "https://api.meteo-concept.com/api/forecast/daily?token=1300b78552501da2240c9dddcd4762f078377305f9ca1b28c4b3f02699f76b5e&insee=95607";
-
-    const COMMERCES = 'wp-json/geodir/v2/commerces';
-    const EVENTS = 'wp-json/geodir/v2/events';
-    const ASSOS = 'wp-json/geodir/v2/places';
-    const LIBERALES = 'wp-json/geodir/v2/liberales';
-    const OPTIONS = `?per_page=100`;
-    const URLFORM = 'http://taverneasy.fr/wp-json/contact-form-7/v1/contact-forms/430/feedback';
+    const API = 'https://maximeredval.fr/wp/';
+    const URLFORM = 'http://maximeredval.fr/wp/wp-json/contact-form-7/v1/contact-forms/430/feedback';
 
       let dicoDay = {
         1 : 'Mo',
@@ -3200,86 +3131,6 @@ var app = (function () {
         return (str.length == 2 ? "" : str)
       }
 
-
-      async function getPlaces (placeType) {
-        switch (placeType) {
-          case "commerces": return await getCommerces(); 
-          case "associations": return await getAssos(); 
-          case "events": return await getEvents();
-          case "liberales": return await getLiberales();
-          default : throw new Error ("Merci de passer un type de structure correc")
-        }
-      }
-
-      async function getCommerces (options) {
-        
-        if (!commerces) {
-          if (!getWithExpiry('localcommerces')) {
-            const res = await axios(`${API}${COMMERCES}${options || OPTIONS}`);
-            commerces = res.data;
-            commerces = commerces.sort((a,b) => (a.title.raw > b.title.raw) ? 1 : ((b.title.raw > a.title.raw) ? -1 : 0));
-            setWithExpiry('localcommerces', res.data, 900000);
-            return commerces;
-          } else return commerces = getWithExpiry('localcommerces');
-        }
-        else return commerces;
-      }
-
-      async function getLiberales (options) {
-        
-        if (!liberales) {
-          if (!getWithExpiry('liberales')) {
-            const res = await axios(`${API}${LIBERALES}${options || OPTIONS}`);
-            liberales = res.data;
-            liberales = liberales.sort((a,b) => (a.title.raw > b.title.raw) ? 1 : ((b.title.raw > a.title.raw) ? -1 : 0));
-            setWithExpiry('liberales', res.data, 900000);
-            return liberales;
-          } else return liberales = getWithExpiry('liberales');
-        }
-        else return liberales;
-      }
-
-      async function getAssos (options) {
-        if (!associations) {
-          if (!getWithExpiry('localassos')) {
-            const res = await axios(`${API}${ASSOS}${options || OPTIONS}`);
-            associations = res.data;
-            associations = associations.sort((a,b) => (a.title.raw > b.title.raw) ? 1 : ((b.title.raw > a.title.raw) ? -1 : 0));
-            setWithExpiry('localassos', res.data, 900000);
-            return associations;
-          } else return associations = getWithExpiry('localassos');
-        }
-        else return associations;
-      }
-
-      async function getEvents (options) {
-        if (!events) {
-          if (!getWithExpiry('localevents')) {
-            const res = await axios(`${API}${EVENTS}${options || OPTIONS}`);
-            events = res.data;
-            events = getUnique(events,'id');
-            events.pop();
-            setWithExpiry('localevents', events, 900000);
-            return events;
-          } else return events = getWithExpiry('localevents');
-        }
-        else return events;
-      }
-
-      function getUnique(originalArray, prop) {
-        var newArray = [];
-        var lookupObject  = {};
-
-        for(var i in originalArray) {
-           lookupObject[originalArray[i][prop]] = originalArray[i];
-        }
-
-        for(i in lookupObject) {
-            newArray.push(lookupObject[i]);
-        }
-         return newArray;
-      }
-
       function getProp(obj, key) {
         return key.split(".").reduce(function(o, x) {
             return (typeof o == "undefined" || o === null) ? o : o[x];
@@ -3287,7 +3138,7 @@ var app = (function () {
       }
 
       function getItems (obj, toggle) {
-        if ((!items.associations.length && toggle=="associations") || (!items.commerces.length && toggle=="commerces")) {
+        if ((!items.places.length && toggle=="places") || (!items.commerces.length && toggle=="commerces")) {
           items[toggle] = [];
         
           let cats = []; let tmp = [];
@@ -3420,15 +3271,13 @@ var app = (function () {
     }
 
     function setWithExpiry(key, value, ttl) {
-      const now = new Date();
-      
-      // `item` is an object which contains the original value
-      // as well as the time when it's supposed to expire
+      const now = new Date();  
     	const item = {
     		value: value,
     		expiry: now.getTime() + ttl
     	};
-    	localStorage.setItem(key, JSON.stringify(item));
+    	sessionStorage.setItem(key, JSON.stringify(item));
+      console.log("from setWith");
     }
 
     function getWithExpiry(key) {
@@ -3437,15 +3286,11 @@ var app = (function () {
     	if (!itemStr) {
     		return null
     	}
+      console.log("from getWithExpiry", item);
     	const item = JSON.parse(itemStr);
     	const now = new Date();
     	// compare the expiry time of the item with the current time
-    	if (now.getTime() > item.expiry) {
-    		// If the item is expired, delete the item from storage
-    		// and return null
-    		localStorage.removeItem(key);
-    		return null
-    	}
+    	if (now.getTime() > item.expiry) ;
     	return item.value
     }
 
@@ -4319,6 +4164,66 @@ var app = (function () {
       }
     };
 
+    const subscriber_queue = [];
+    /**
+     * Create a `Writable` store that allows both updating and reading by subscription.
+     * @param {*=}value initial value
+     * @param {StartStopNotifier=}start start and stop notifications for subscriptions
+     */
+    function writable(value, start = noop) {
+        let stop;
+        const subscribers = new Set();
+        function set(new_value) {
+            if (safe_not_equal(value, new_value)) {
+                value = new_value;
+                if (stop) { // store is ready
+                    const run_queue = !subscriber_queue.length;
+                    for (const subscriber of subscribers) {
+                        subscriber[1]();
+                        subscriber_queue.push(subscriber, value);
+                    }
+                    if (run_queue) {
+                        for (let i = 0; i < subscriber_queue.length; i += 2) {
+                            subscriber_queue[i][0](subscriber_queue[i + 1]);
+                        }
+                        subscriber_queue.length = 0;
+                    }
+                }
+            }
+        }
+        function update(fn) {
+            set(fn(value));
+        }
+        function subscribe(run, invalidate = noop) {
+            const subscriber = [run, invalidate];
+            subscribers.add(subscriber);
+            if (subscribers.size === 1) {
+                stop = start(set) || noop;
+            }
+            run(value);
+            return () => {
+                subscribers.delete(subscriber);
+                if (subscribers.size === 0) {
+                    stop();
+                    stop = null;
+                }
+            };
+        }
+        return { set, update, subscribe };
+    }
+
+    const activeListItem = writable(0);
+    const activeMapItem = writable(0);
+    let selectedItem = writable({id:0, name:"",slug:"",type:"",index:0});
+    let mobileViewport = writable({mob:0, touch:0});
+    let isScrolling = writable(0);
+    let pages = writable({
+        commerces: {total : undefined, current :undefined},
+        liberales: {total : undefined, current :undefined},
+        places: {total : undefined, current :undefined},
+        events: {total : undefined, current :undefined},
+    });
+
     function styleInject(css, ref) {
       if ( ref === void 0 ) ref = {};
       var insertAt = ref.insertAt;
@@ -4565,7 +4470,7 @@ var app = (function () {
     	let div0_transition;
     	let div1_class_value;
     	let current;
-    	let if_block0 = /*backdrop*/ ctx[4] && create_if_block_2$c(ctx);
+    	let if_block0 = /*backdrop*/ ctx[4] && create_if_block_2$b(ctx);
     	let if_block1 = /*showClose*/ ctx[3] && create_if_block_1$c(ctx);
     	const default_slot_template = /*#slots*/ ctx[18].default;
     	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[17], null);
@@ -4630,7 +4535,7 @@ var app = (function () {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
-    					if_block0 = create_if_block_2$c(ctx);
+    					if_block0 = create_if_block_2$b(ctx);
     					if_block0.c();
     					if_block0.m(div1, t0);
     				}
@@ -4727,7 +4632,7 @@ var app = (function () {
     }
 
     // (56:4) {#if backdrop}
-    function create_if_block_2$c(ctx) {
+    function create_if_block_2$b(ctx) {
     	let div;
     	let mounted;
     	let dispose;
@@ -5047,7 +4952,7 @@ var app = (function () {
     	let mounted;
     	let dispose;
     	let if_block0 = !/*telephone*/ ctx[1] && create_if_block_3$8();
-    	let if_block1 = /*telephone*/ ctx[1] && create_if_block_2$b(ctx);
+    	let if_block1 = /*telephone*/ ctx[1] && create_if_block_2$a(ctx);
 
     	return {
     		c() {
@@ -5095,7 +5000,7 @@ var app = (function () {
     						transition_in(if_block1, 1);
     					}
     				} else {
-    					if_block1 = create_if_block_2$b(ctx);
+    					if_block1 = create_if_block_2$a(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
     					if_block1.m(a, null);
@@ -5142,7 +5047,7 @@ var app = (function () {
     }
 
     // (38:4) {#if telephone}
-    function create_if_block_2$b(ctx) {
+    function create_if_block_2$a(ctx) {
     	let t0;
     	let span;
     	let t1_value = /*listItem*/ ctx[0].phone + "";
@@ -5783,7 +5688,7 @@ var app = (function () {
     	let div0;
     	let raw_value = (/*A*/ ctx[0][/*currentIndex*/ ctx[5]].specialdescription || /*A*/ ctx[0][/*currentIndex*/ ctx[5]].content.rendered) + "";
     	let t12;
-    	let show_if = allHorairesHtml(/*A*/ ctx[0][/*currentIndex*/ ctx[5]], "is-fullwidth") != "undefined" && /*toggle*/ ctx[1] != "associations";
+    	let show_if = allHorairesHtml(/*A*/ ctx[0][/*currentIndex*/ ctx[5]], "is-fullwidth") != "undefined" && /*toggle*/ ctx[1] != "places";
     	let current;
     	const if_block_creators = [create_if_block_9$1, create_else_block_3$1];
     	const if_blocks = [];
@@ -5929,7 +5834,7 @@ var app = (function () {
     				attr(a3, "href", a3_href_value);
     			}
 
-    			if ((!current || dirty[0] & /*A, currentIndex*/ 33) && raw_value !== (raw_value = (/*A*/ ctx[0][/*currentIndex*/ ctx[5]].specialdescription || /*A*/ ctx[0][/*currentIndex*/ ctx[5]].content.rendered) + "")) div0.innerHTML = raw_value;			if (dirty[0] & /*A, currentIndex, toggle*/ 35) show_if = allHorairesHtml(/*A*/ ctx[0][/*currentIndex*/ ctx[5]], "is-fullwidth") != "undefined" && /*toggle*/ ctx[1] != "associations";
+    			if ((!current || dirty[0] & /*A, currentIndex*/ 33) && raw_value !== (raw_value = (/*A*/ ctx[0][/*currentIndex*/ ctx[5]].specialdescription || /*A*/ ctx[0][/*currentIndex*/ ctx[5]].content.rendered) + "")) div0.innerHTML = raw_value;			if (dirty[0] & /*A, currentIndex, toggle*/ 35) show_if = allHorairesHtml(/*A*/ ctx[0][/*currentIndex*/ ctx[5]], "is-fullwidth") != "undefined" && /*toggle*/ ctx[1] != "places";
 
     			if (show_if) {
     				if (if_block1) {
@@ -6050,7 +5955,7 @@ var app = (function () {
     	};
     }
 
-    // (188:10) {#if allHorairesHtml(A[currentIndex], "is-fullwidth") != "undefined" && toggle!="associations"}
+    // (188:10) {#if allHorairesHtml(A[currentIndex], "is-fullwidth") != "undefined" && toggle!="places"}
     function create_if_block_8$1(ctx) {
     	let div;
     	let h2;
@@ -6173,7 +6078,7 @@ var app = (function () {
     	};
     }
 
-    // (203:8) {#if toggle!="associations"}
+    // (203:8) {#if toggle!="places"}
     function create_if_block_6$1(ctx) {
     	let p;
     	let i;
@@ -6214,7 +6119,7 @@ var app = (function () {
     	let t1_value = /*A*/ ctx[0][/*currentIndex*/ ctx[5]].street + "";
     	let t1;
     	let t2;
-    	let if_block = /*toggle*/ ctx[1] != "associations" && create_if_block_6$1(ctx);
+    	let if_block = /*toggle*/ ctx[1] != "places" && create_if_block_6$1(ctx);
 
     	return {
     		c() {
@@ -6242,7 +6147,7 @@ var app = (function () {
     		p(ctx, dirty) {
     			if (dirty[0] & /*A, currentIndex*/ 33 && t1_value !== (t1_value = /*A*/ ctx[0][/*currentIndex*/ ctx[5]].street + "")) set_data(t1, t1_value);
 
-    			if (/*toggle*/ ctx[1] != "associations") {
+    			if (/*toggle*/ ctx[1] != "places") {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
@@ -6262,7 +6167,7 @@ var app = (function () {
     	};
     }
 
-    // (266:16) {#if toggle!="associations"}
+    // (267:16) {#if toggle!="places"}
     function create_if_block_4$6(ctx) {
     	let html_tag;
     	let raw_value = allHorairesHtml(/*listItem*/ ctx[42]) + "";
@@ -6288,11 +6193,11 @@ var app = (function () {
     	};
     }
 
-    // (244:10) <Collapse open={openHoraires} >
+    // (245:10) <Collapse open={openHoraires} >
     function create_default_slot$5(ctx) {
     	let div1;
     	let div0;
-    	let if_block = /*toggle*/ ctx[1] != "associations" && create_if_block_4$6(ctx);
+    	let if_block = /*toggle*/ ctx[1] != "places" && create_if_block_4$6(ctx);
 
     	return {
     		c() {
@@ -6308,7 +6213,7 @@ var app = (function () {
     			if (if_block) if_block.m(div0, null);
     		},
     		p(ctx, dirty) {
-    			if (/*toggle*/ ctx[1] != "associations") {
+    			if (/*toggle*/ ctx[1] != "places") {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
@@ -6328,9 +6233,9 @@ var app = (function () {
     	};
     }
 
-    // (253:18) {:else}
+    // (254:18) {:else}
     function create_else_block_2$1(ctx) {
-    	let t_value = /*listItem*/ ctx[42].post_category[0].name + "";
+    	let t_value = /*listItem*/ ctx[42].post_category[0]?.name + "";
     	let t;
 
     	return {
@@ -6341,7 +6246,7 @@ var app = (function () {
     			insert(target, t, anchor);
     		},
     		p(ctx, dirty) {
-    			if (dirty[0] & /*A*/ 1 && t_value !== (t_value = /*listItem*/ ctx[42].post_category[0].name + "")) set_data(t, t_value);
+    			if (dirty[0] & /*A*/ 1 && t_value !== (t_value = /*listItem*/ ctx[42].post_category[0]?.name + "")) set_data(t, t_value);
     		},
     		d(detaching) {
     			if (detaching) detach(t);
@@ -6349,7 +6254,7 @@ var app = (function () {
     	};
     }
 
-    // (251:18) {#if toggle=="commerces"}
+    // (252:18) {#if toggle=="commerces"}
     function create_if_block_3$7(ctx) {
     	let t_value = /*nextState*/ ctx[15](/*index*/ ctx[44]) + "";
     	let t;
@@ -6368,8 +6273,8 @@ var app = (function () {
     	};
     }
 
-    // (257:18) {#if displayPlus && toggle=="commerces"}
-    function create_if_block_2$a(ctx) {
+    // (258:18) {#if displayPlus && toggle=="commerces"}
+    function create_if_block_2$9(ctx) {
     	let span;
 
     	return {
@@ -6387,7 +6292,7 @@ var app = (function () {
     	};
     }
 
-    // (245:12) 
+    // (246:12) 
     function create_trigger_slot(ctx) {
     	let div2;
     	let div1;
@@ -6403,7 +6308,7 @@ var app = (function () {
 
     	let current_block_type = select_block_type_2(ctx);
     	let if_block0 = current_block_type(ctx);
-    	let if_block1 = /*displayPlus*/ ctx[9] && /*toggle*/ ctx[1] == "commerces" && create_if_block_2$a();
+    	let if_block1 = /*displayPlus*/ ctx[9] && /*toggle*/ ctx[1] == "commerces" && create_if_block_2$9();
 
     	return {
     		c() {
@@ -6450,7 +6355,7 @@ var app = (function () {
 
     			if (/*displayPlus*/ ctx[9] && /*toggle*/ ctx[1] == "commerces") {
     				if (if_block1) ; else {
-    					if_block1 = create_if_block_2$a();
+    					if_block1 = create_if_block_2$9();
     					if_block1.c();
     					if_block1.m(div0, null);
     				}
@@ -6469,7 +6374,7 @@ var app = (function () {
     	};
     }
 
-    // (287:8) {:else}
+    // (288:8) {:else}
     function create_else_block_1$2(ctx) {
     	let html_tag;
     	let raw_value = /*listItem*/ ctx[42].content.rendered + "";
@@ -6519,7 +6424,7 @@ var app = (function () {
     	};
     }
 
-    // (277:8) {#if listItem.content.rendered.length > 250}
+    // (278:8) {#if listItem.content.rendered.length > 250}
     function create_if_block$f(ctx) {
     	let p0;
     	let raw_value = (/*listItem*/ ctx[42].specialdescription || /*listItem*/ ctx[42].content.rendered) + "";
@@ -6606,7 +6511,7 @@ var app = (function () {
     	};
     }
 
-    // (283:51) {:else}
+    // (284:51) {:else}
     function create_else_block$6(ctx) {
     	let t;
 
@@ -6623,7 +6528,7 @@ var app = (function () {
     	};
     }
 
-    // (283:16) {#if !readMore[index]}
+    // (284:16) {#if !readMore[index]}
     function create_if_block_1$a(ctx) {
     	let t;
 
@@ -6640,7 +6545,7 @@ var app = (function () {
     	};
     }
 
-    // (294:8) {#each listItem.post_category as tag}
+    // (295:8) {#each listItem.post_category as tag}
     function create_each_block_1$2(ctx) {
     	let span;
     	let t0_value = /*tag*/ ctx[45].name + "";
@@ -6669,7 +6574,7 @@ var app = (function () {
     	};
     }
 
-    // (220:0) {#each A as listItem, index}
+    // (221:0) {#each A as listItem, index}
     function create_each_block$5(ctx) {
     	let div7;
     	let div6;
@@ -7129,7 +7034,7 @@ var app = (function () {
     	let displayPlus = false;
 
     	const boutonText = {
-    		"associations": "associations",
+    		"places": "associations",
     		"commerces": "commerces",
     		"liberales": "Prof. libérales"
     	};
@@ -7219,7 +7124,7 @@ var app = (function () {
     		? avantMidi.splice(2, 0, "H")
     		: soir == undefined
     			? "(non renseigné)"
-    			: soir.splice(2, 0, 'H')); else return toggle != "associations" ? `Horaires indisponibles` : "";
+    			: soir.splice(2, 0, 'H')); else return toggle != "places" ? `Horaires indisponibles` : "";
     	}
 
     	// Update list position si active list item updatée via map
@@ -7414,7 +7319,7 @@ var app = (function () {
     	let t4;
     	let mounted;
     	let dispose;
-    	let if_block = /*horaires*/ ctx[2] != "undefined" && create_if_block$e(ctx);
+    	let if_block = /*horaires*/ ctx[2] !== "undefined" && create_if_block$e(ctx);
 
     	return {
     		c() {
@@ -7434,7 +7339,6 @@ var app = (function () {
     			attr(div0, "style", div0_style_value = "-webkit-mask-box-image : url(./svg/cat/" + /*svgmask*/ ctx[3] + ");");
     			attr(div1, "class", "circle-background svelte-14ulsn7");
     			set_style(div1, "background-color", /*bgColor*/ ctx[4]);
-    			toggle_class(div1, "isbig", /*$isBigArray*/ ctx[9][/*index*/ ctx[6]]);
     			attr(h1, "class", "is-size-5 has-text-weight-semibold has-text-primary svelte-14ulsn7");
     			attr(p, "class", p_class_value = "is-size-5 has-text-weight-bold has-text-warning " + /*titleColor*/ ctx[5] + " svelte-14ulsn7");
     			attr(div2, "class", "is-block has-text-centered is-centered popmax svelte-14ulsn7");
@@ -7442,7 +7346,7 @@ var app = (function () {
     		m(target, anchor) {
     			insert(target, div1, anchor);
     			append(div1, div0);
-    			/*div1_binding*/ ctx[14](div1);
+    			/*div1_binding*/ ctx[13](div1);
     			insert(target, t0, anchor);
     			insert(target, div2, anchor);
     			append(div2, span);
@@ -7453,10 +7357,10 @@ var app = (function () {
     			append(p, t3);
     			append(span, t4);
     			if (if_block) if_block.m(span, null);
-    			/*div2_binding*/ ctx[16](div2);
+    			/*div2_binding*/ ctx[15](div2);
 
     			if (!mounted) {
-    				dispose = listen(div1, "click", /*click_handler*/ ctx[15]);
+    				dispose = listen(div1, "click", /*click_handler*/ ctx[14]);
     				mounted = true;
     			}
     		},
@@ -7469,10 +7373,6 @@ var app = (function () {
     				set_style(div1, "background-color", /*bgColor*/ ctx[4]);
     			}
 
-    			if (dirty & /*$isBigArray, index*/ 576) {
-    				toggle_class(div1, "isbig", /*$isBigArray*/ ctx[9][/*index*/ ctx[6]]);
-    			}
-
     			if (dirty & /*title*/ 2) set_data(t1, /*title*/ ctx[1]);
     			if (dirty & /*currentStatus*/ 1) set_data(t3, /*currentStatus*/ ctx[0]);
 
@@ -7480,7 +7380,7 @@ var app = (function () {
     				attr(p, "class", p_class_value);
     			}
 
-    			if (/*horaires*/ ctx[2] != "undefined") {
+    			if (/*horaires*/ ctx[2] !== "undefined") {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
@@ -7497,11 +7397,11 @@ var app = (function () {
     		o: noop,
     		d(detaching) {
     			if (detaching) detach(div1);
-    			/*div1_binding*/ ctx[14](null);
+    			/*div1_binding*/ ctx[13](null);
     			if (detaching) detach(t0);
     			if (detaching) detach(div2);
     			if (if_block) if_block.d();
-    			/*div2_binding*/ ctx[16](null);
+    			/*div2_binding*/ ctx[15](null);
     			mounted = false;
     			dispose();
     		}
@@ -7509,10 +7409,8 @@ var app = (function () {
     }
 
     function instance$p($$self, $$props, $$invalidate) {
-    	let $isBigArray;
     	let $isScrolling;
-    	component_subscribe($$self, isBigArray, $$value => $$invalidate(9, $isBigArray = $$value));
-    	component_subscribe($$self, isScrolling, $$value => $$invalidate(17, $isScrolling = $$value));
+    	component_subscribe($$self, isScrolling, $$value => $$invalidate(16, $isScrolling = $$value));
     	const { getMap } = getContext(key);
     	const mapMax = getMap();
     	let markerdiv;
@@ -7537,14 +7435,12 @@ var app = (function () {
     	function handleMarkerClick() {
     		set_store_value(isScrolling, $isScrolling = true, $isScrolling);
     		dispatch('updateListPlease', { state: index });
-    		set_store_value(isBigArray, $isBigArray = [], $isBigArray);
-    		set_store_value(isBigArray, $isBigArray[index] = true, $isBigArray);
     	}
 
     	function div1_binding($$value) {
     		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			markerdiv = $$value;
-    			$$invalidate(7, markerdiv);
+    			$$invalidate(6, markerdiv);
     		});
     	}
 
@@ -7553,21 +7449,21 @@ var app = (function () {
     	function div2_binding($$value) {
     		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			elPopup = $$value;
-    			$$invalidate(8, elPopup);
+    			$$invalidate(7, elPopup);
     		});
     	}
 
     	$$self.$$set = $$props => {
-    		if ('lat' in $$props) $$invalidate(11, lat = $$props.lat);
-    		if ('lon' in $$props) $$invalidate(12, lon = $$props.lon);
+    		if ('lat' in $$props) $$invalidate(9, lat = $$props.lat);
+    		if ('lon' in $$props) $$invalidate(10, lon = $$props.lon);
     		if ('currentStatus' in $$props) $$invalidate(0, currentStatus = $$props.currentStatus);
     		if ('title' in $$props) $$invalidate(1, title = $$props.title);
     		if ('horaires' in $$props) $$invalidate(2, horaires = $$props.horaires);
     		if ('svgmask' in $$props) $$invalidate(3, svgmask = $$props.svgmask);
     		if ('bgColor' in $$props) $$invalidate(4, bgColor = $$props.bgColor);
     		if ('titleColor' in $$props) $$invalidate(5, titleColor = $$props.titleColor);
-    		if ('index' in $$props) $$invalidate(6, index = $$props.index);
-    		if ('Alength' in $$props) $$invalidate(13, Alength = $$props.Alength);
+    		if ('index' in $$props) $$invalidate(11, index = $$props.index);
+    		if ('Alength' in $$props) $$invalidate(12, Alength = $$props.Alength);
     	};
 
     	return [
@@ -7577,13 +7473,12 @@ var app = (function () {
     		svgmask,
     		bgColor,
     		titleColor,
-    		index,
     		markerdiv,
     		elPopup,
-    		$isBigArray,
     		handleMarkerClick,
     		lat,
     		lon,
+    		index,
     		Alength,
     		div1_binding,
     		click_handler,
@@ -7596,16 +7491,16 @@ var app = (function () {
     		super();
 
     		init(this, options, instance$p, create_fragment$q, safe_not_equal, {
-    			lat: 11,
-    			lon: 12,
+    			lat: 9,
+    			lon: 10,
     			currentStatus: 0,
     			title: 1,
     			horaires: 2,
     			svgmask: 3,
     			bgColor: 4,
     			titleColor: 5,
-    			index: 6,
-    			Alength: 13
+    			index: 11,
+    			Alength: 12
     		});
     	}
     }
@@ -7619,19 +7514,19 @@ var app = (function () {
 
     function get_each_context$4(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[15] = list[i];
-    	child_ctx[17] = i;
+    	child_ctx[14] = list[i];
+    	child_ctx[16] = i;
     	return child_ctx;
     }
 
-    // (112:2) {#if mapMax}
+    // (110:2) {#if mapMax}
     function create_if_block$d(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map_1();
     	let each_1_anchor;
     	let current;
     	let each_value = /*A*/ ctx[0];
-    	const get_key = ctx => /*M*/ ctx[15].id;
+    	const get_key = ctx => /*M*/ ctx[14].id;
 
     	for (let i = 0; i < each_value.length; i += 1) {
     		let child_ctx = get_each_context$4(ctx, each_value, i);
@@ -7689,7 +7584,7 @@ var app = (function () {
     	};
     }
 
-    // (113:4) {#each A as M, index (M.id)}
+    // (111:4) {#each A as M, index (M.id)}
     function create_each_block$4(key_2, ctx) {
     	let first;
     	let marker;
@@ -7697,23 +7592,23 @@ var app = (function () {
 
     	marker = new Marker({
     			props: {
-    				lat: /*M*/ ctx[15].latitude,
-    				lon: /*M*/ ctx[15].longitude,
-    				horaires: allHorairesHtml(/*M*/ ctx[15]),
-    				title: /*M*/ ctx[15].title.rendered,
+    				lat: /*M*/ ctx[14].latitude,
+    				lon: /*M*/ ctx[14].longitude,
+    				horaires: allHorairesHtml(/*M*/ ctx[14]),
+    				title: /*M*/ ctx[14].title.rendered,
     				currentStatus: /*toggle*/ ctx[1] == "commerces"
-    				? dicoraireCouleurs[getProp(/*M*/ ctx[15], 'business_hours.rendered.extra.current_label')].fr
+    				? dicoraireCouleurs[getProp(/*M*/ ctx[14], 'business_hours.rendered.extra.current_label')].fr
     				: /*toggle*/ ctx[1] == "events"
-    					? /*M*/ ctx[15].start_date.rendered
+    					? /*M*/ ctx[14].start_date?.rendered
     					: "",
-    				svgmask: dicoIcons[getDefaultCategory(/*M*/ ctx[15])]
-    				? dicoIcons[getDefaultCategory(/*M*/ ctx[15])].icon
+    				svgmask: dicoIcons[getDefaultCategory(/*M*/ ctx[14])]
+    				? dicoIcons[getDefaultCategory(/*M*/ ctx[14])].icon
     				: 'undefined.svg',
-    				bgColor: dicoIcons[getDefaultCategory(/*M*/ ctx[15])]
-    				? dicoIcons[getDefaultCategory(/*M*/ ctx[15])].color
+    				bgColor: dicoIcons[getDefaultCategory(/*M*/ ctx[14])]
+    				? dicoIcons[getDefaultCategory(/*M*/ ctx[14])].color
     				: "#FFF",
-    				titleColor: dicoraireCouleurs[getProp(/*M*/ ctx[15], 'business_hours.rendered.extra.current_label')].color,
-    				index: /*index*/ ctx[17],
+    				titleColor: dicoraireCouleurs[getProp(/*M*/ ctx[14], 'business_hours.rendered.extra.current_label')].color,
+    				index: /*index*/ ctx[16],
     				Alength: /*A*/ ctx[0].length
     			}
     		});
@@ -7736,27 +7631,27 @@ var app = (function () {
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
     			const marker_changes = {};
-    			if (dirty & /*A*/ 1) marker_changes.lat = /*M*/ ctx[15].latitude;
-    			if (dirty & /*A*/ 1) marker_changes.lon = /*M*/ ctx[15].longitude;
-    			if (dirty & /*A*/ 1) marker_changes.horaires = allHorairesHtml(/*M*/ ctx[15]);
-    			if (dirty & /*A*/ 1) marker_changes.title = /*M*/ ctx[15].title.rendered;
+    			if (dirty & /*A*/ 1) marker_changes.lat = /*M*/ ctx[14].latitude;
+    			if (dirty & /*A*/ 1) marker_changes.lon = /*M*/ ctx[14].longitude;
+    			if (dirty & /*A*/ 1) marker_changes.horaires = allHorairesHtml(/*M*/ ctx[14]);
+    			if (dirty & /*A*/ 1) marker_changes.title = /*M*/ ctx[14].title.rendered;
 
     			if (dirty & /*toggle, A*/ 3) marker_changes.currentStatus = /*toggle*/ ctx[1] == "commerces"
-    			? dicoraireCouleurs[getProp(/*M*/ ctx[15], 'business_hours.rendered.extra.current_label')].fr
+    			? dicoraireCouleurs[getProp(/*M*/ ctx[14], 'business_hours.rendered.extra.current_label')].fr
     			: /*toggle*/ ctx[1] == "events"
-    				? /*M*/ ctx[15].start_date.rendered
+    				? /*M*/ ctx[14].start_date?.rendered
     				: "";
 
-    			if (dirty & /*A*/ 1) marker_changes.svgmask = dicoIcons[getDefaultCategory(/*M*/ ctx[15])]
-    			? dicoIcons[getDefaultCategory(/*M*/ ctx[15])].icon
+    			if (dirty & /*A*/ 1) marker_changes.svgmask = dicoIcons[getDefaultCategory(/*M*/ ctx[14])]
+    			? dicoIcons[getDefaultCategory(/*M*/ ctx[14])].icon
     			: 'undefined.svg';
 
-    			if (dirty & /*A*/ 1) marker_changes.bgColor = dicoIcons[getDefaultCategory(/*M*/ ctx[15])]
-    			? dicoIcons[getDefaultCategory(/*M*/ ctx[15])].color
+    			if (dirty & /*A*/ 1) marker_changes.bgColor = dicoIcons[getDefaultCategory(/*M*/ ctx[14])]
+    			? dicoIcons[getDefaultCategory(/*M*/ ctx[14])].color
     			: "#FFF";
 
-    			if (dirty & /*A*/ 1) marker_changes.titleColor = dicoraireCouleurs[getProp(/*M*/ ctx[15], 'business_hours.rendered.extra.current_label')].color;
-    			if (dirty & /*A*/ 1) marker_changes.index = /*index*/ ctx[17];
+    			if (dirty & /*A*/ 1) marker_changes.titleColor = dicoraireCouleurs[getProp(/*M*/ ctx[14], 'business_hours.rendered.extra.current_label')].color;
+    			if (dirty & /*A*/ 1) marker_changes.index = /*index*/ ctx[16];
     			if (dirty & /*A*/ 1) marker_changes.Alength = /*A*/ ctx[0].length;
     			marker.$set(marker_changes);
     		},
@@ -7862,10 +7757,8 @@ var app = (function () {
     }
 
     function instance$o($$self, $$props, $$invalidate) {
-    	let $isBigArray;
     	let $isScrolling;
-    	component_subscribe($$self, isBigArray, $$value => $$invalidate(7, $isBigArray = $$value));
-    	component_subscribe($$self, isScrolling, $$value => $$invalidate(8, $isScrolling = $$value));
+    	component_subscribe($$self, isScrolling, $$value => $$invalidate(7, $isScrolling = $$value));
     	let container;
     	createEventDispatcher();
     	let mapMax;
@@ -7922,8 +7815,6 @@ var app = (function () {
     	}
 
     	const unsubscribeActiveMapItem = activeMapItem.subscribe(newActiveMapItem => {
-    		set_store_value(isBigArray, $isBigArray = [], $isBigArray);
-
     		if (mapMax && !$isScrolling) {
     			mapMax.flyTo({
     				center: [
@@ -7932,8 +7823,6 @@ var app = (function () {
     				],
     				zoom: 17
     			});
-
-    			set_store_value(isBigArray, $isBigArray[newActiveMapItem] = true, $isBigArray);
     		}
 
     		resetScroll();
@@ -7995,7 +7884,7 @@ var app = (function () {
     }
 
     // (100:0) {#if active}
-    function create_if_block_8(ctx) {
+    function create_if_block_9(ctx) {
     	let modal;
     	let updating_active;
     	let current;
@@ -8062,7 +7951,7 @@ var app = (function () {
     }
 
     // (135:21) 
-    function create_if_block_13(ctx) {
+    function create_if_block_14(ctx) {
     	let div;
     	let img;
     	let img_src_value;
@@ -8122,7 +8011,7 @@ var app = (function () {
     }
 
     // (103:4) {#if !bigify}
-    function create_if_block_12(ctx) {
+    function create_if_block_13(ctx) {
     	let draggableframes;
     	let t0;
     	let div4;
@@ -8339,7 +8228,7 @@ var app = (function () {
     	let if_block;
     	let if_block_anchor;
     	let current;
-    	const if_block_creators = [create_if_block_12, create_if_block_13];
+    	const if_block_creators = [create_if_block_13, create_if_block_14];
     	const if_blocks = [];
 
     	function select_block_type_3(ctx, dirty) {
@@ -8453,7 +8342,7 @@ var app = (function () {
     }
 
     // (140:6) {#if A[currentIndex].start_date.raw != A[currentIndex].end_date.raw}
-    function create_if_block_11(ctx) {
+    function create_if_block_12(ctx) {
     	let p;
     	let i;
     	let t0;
@@ -8533,7 +8422,7 @@ var app = (function () {
     }
 
     // (147:6) {#if A[currentIndex].start_time.raw == A[currentIndex].end_time.raw}
-    function create_if_block_10(ctx) {
+    function create_if_block_11(ctx) {
     	let p;
     	let i;
     	let t0;
@@ -8588,7 +8477,7 @@ var app = (function () {
     }
 
     // (154:6) {#if A[currentIndex].event_reg_fees}
-    function create_if_block_9(ctx) {
+    function create_if_block_10(ctx) {
     	let p;
     	let i;
     	let t0;
@@ -8632,7 +8521,7 @@ var app = (function () {
     	let t1;
 
     	function select_block_type(ctx, dirty) {
-    		if (/*A*/ ctx[0][/*currentIndex*/ ctx[3]].start_date.raw != /*A*/ ctx[0][/*currentIndex*/ ctx[3]].end_date.raw) return create_if_block_11;
+    		if (/*A*/ ctx[0][/*currentIndex*/ ctx[3]].start_date.raw != /*A*/ ctx[0][/*currentIndex*/ ctx[3]].end_date.raw) return create_if_block_12;
     		return create_else_block_3;
     	}
 
@@ -8640,7 +8529,7 @@ var app = (function () {
     	let if_block0 = current_block_type(ctx);
 
     	function select_block_type_1(ctx, dirty) {
-    		if (/*A*/ ctx[0][/*currentIndex*/ ctx[3]].start_time.raw == /*A*/ ctx[0][/*currentIndex*/ ctx[3]].end_time.raw) return create_if_block_10;
+    		if (/*A*/ ctx[0][/*currentIndex*/ ctx[3]].start_time.raw == /*A*/ ctx[0][/*currentIndex*/ ctx[3]].end_time.raw) return create_if_block_11;
     		return create_else_block_2;
     	}
 
@@ -8648,7 +8537,7 @@ var app = (function () {
     	let if_block1 = current_block_type_1(ctx);
 
     	function select_block_type_2(ctx, dirty) {
-    		if (/*A*/ ctx[0][/*currentIndex*/ ctx[3]].event_reg_fees) return create_if_block_9;
+    		if (/*A*/ ctx[0][/*currentIndex*/ ctx[3]].event_reg_fees) return create_if_block_10;
     		return create_else_block_1$1;
     	}
 
@@ -8720,7 +8609,44 @@ var app = (function () {
     	};
     }
 
-    // (202:18) {#if (cat.id == listItem.default_category)}
+    // (182:6) {#if listItem.start_date?.raw}
+    function create_if_block_8(ctx) {
+    	let t0_value = timeState(/*listItem*/ ctx[27].start_date?.raw, /*listItem*/ ctx[27].end_date?.raw) + "";
+    	let t0;
+    	let br;
+    	let t1;
+    	let p;
+    	let raw_value = writeWeather(/*listItem*/ ctx[27].start_date.raw) + "";
+
+    	return {
+    		c() {
+    			t0 = text(t0_value);
+    			br = element("br");
+    			t1 = space();
+    			p = element("p");
+    			attr(br, "class", "svelte-1njr46c");
+    			attr(p, "class", "is-size-6 is-size-7-touch svelte-1njr46c");
+    		},
+    		m(target, anchor) {
+    			insert(target, t0, anchor);
+    			insert(target, br, anchor);
+    			insert(target, t1, anchor);
+    			insert(target, p, anchor);
+    			p.innerHTML = raw_value;
+    		},
+    		p(ctx, dirty) {
+    			if (dirty[0] & /*A*/ 1 && t0_value !== (t0_value = timeState(/*listItem*/ ctx[27].start_date?.raw, /*listItem*/ ctx[27].end_date?.raw) + "")) set_data(t0, t0_value);
+    			if (dirty[0] & /*A*/ 1 && raw_value !== (raw_value = writeWeather(/*listItem*/ ctx[27].start_date.raw) + "")) p.innerHTML = raw_value;		},
+    		d(detaching) {
+    			if (detaching) detach(t0);
+    			if (detaching) detach(br);
+    			if (detaching) detach(t1);
+    			if (detaching) detach(p);
+    		}
+    	};
+    }
+
+    // (203:18) {#if (cat.id == listItem.default_category)}
     function create_if_block_7(ctx) {
     	let img;
     	let img_src_value;
@@ -8752,7 +8678,7 @@ var app = (function () {
     	};
     }
 
-    // (201:16) {#each listItem.post_category as cat, index}
+    // (202:16) {#each listItem.post_category as cat, index}
     function create_each_block_2(ctx) {
     	let if_block_anchor;
     	let if_block = /*cat*/ ctx[32].id == /*listItem*/ ctx[27].default_category && create_if_block_7(ctx);
@@ -8787,7 +8713,7 @@ var app = (function () {
     	};
     }
 
-    // (212:14) {#if listItem.tlphone}
+    // (213:14) {#if listItem.tlphone}
     function create_if_block_6(ctx) {
     	let a;
     	let t0;
@@ -8821,7 +8747,7 @@ var app = (function () {
     	};
     }
 
-    // (217:16) {#if index < 3}
+    // (218:16) {#if index < 3}
     function create_if_block_5$2(ctx) {
     	let div;
     	let t0;
@@ -8852,7 +8778,7 @@ var app = (function () {
     	};
     }
 
-    // (216:14) {#each listItem.post_category as tag, index}
+    // (217:14) {#each listItem.post_category as tag, index}
     function create_each_block_1$1(ctx) {
     	let if_block_anchor;
     	let if_block = /*index*/ ctx[29] < 3 && create_if_block_5$2(ctx);
@@ -8876,16 +8802,16 @@ var app = (function () {
     	};
     }
 
-    // (229:16) {:else}
+    // (230:16) {:else}
     function create_else_block$5(ctx) {
     	let t0;
-    	let t1_value = /*listItem*/ ctx[27].start_date.raw.split("-").reverse().join("/") + "";
+    	let t1_value = /*listItem*/ ctx[27].start_date?.raw.split("-").reverse().join("/") + "";
     	let t1;
     	let t2;
-    	let t3_value = /*listItem*/ ctx[27].start_time.raw + "";
+    	let t3_value = /*listItem*/ ctx[27].start_time?.raw + "";
     	let t3;
     	let t4;
-    	let t5_value = /*listItem*/ ctx[27].end_time.raw + "";
+    	let t5_value = /*listItem*/ ctx[27].end_time?.raw + "";
     	let t5;
 
     	return {
@@ -8906,9 +8832,9 @@ var app = (function () {
     			insert(target, t5, anchor);
     		},
     		p(ctx, dirty) {
-    			if (dirty[0] & /*A*/ 1 && t1_value !== (t1_value = /*listItem*/ ctx[27].start_date.raw.split("-").reverse().join("/") + "")) set_data(t1, t1_value);
-    			if (dirty[0] & /*A*/ 1 && t3_value !== (t3_value = /*listItem*/ ctx[27].start_time.raw + "")) set_data(t3, t3_value);
-    			if (dirty[0] & /*A*/ 1 && t5_value !== (t5_value = /*listItem*/ ctx[27].end_time.raw + "")) set_data(t5, t5_value);
+    			if (dirty[0] & /*A*/ 1 && t1_value !== (t1_value = /*listItem*/ ctx[27].start_date?.raw.split("-").reverse().join("/") + "")) set_data(t1, t1_value);
+    			if (dirty[0] & /*A*/ 1 && t3_value !== (t3_value = /*listItem*/ ctx[27].start_time?.raw + "")) set_data(t3, t3_value);
+    			if (dirty[0] & /*A*/ 1 && t5_value !== (t5_value = /*listItem*/ ctx[27].end_time?.raw + "")) set_data(t5, t5_value);
     		},
     		d(detaching) {
     			if (detaching) detach(t0);
@@ -8921,13 +8847,13 @@ var app = (function () {
     	};
     }
 
-    // (227:16) {#if listItem.start_date.rendered != listItem.end_date.rendered}
+    // (228:16) {#if listItem.start_date?.rendered != listItem.end_date?.rendered}
     function create_if_block_4$5(ctx) {
     	let t0;
-    	let t1_value = /*listItem*/ ctx[27].start_date.rendered + "";
+    	let t1_value = /*listItem*/ ctx[27].start_date?.rendered + "";
     	let t1;
     	let t2;
-    	let t3_value = /*listItem*/ ctx[27].end_date.rendered + "";
+    	let t3_value = /*listItem*/ ctx[27].end_date?.rendered + "";
     	let t3;
 
     	return {
@@ -8944,8 +8870,8 @@ var app = (function () {
     			insert(target, t3, anchor);
     		},
     		p(ctx, dirty) {
-    			if (dirty[0] & /*A*/ 1 && t1_value !== (t1_value = /*listItem*/ ctx[27].start_date.rendered + "")) set_data(t1, t1_value);
-    			if (dirty[0] & /*A*/ 1 && t3_value !== (t3_value = /*listItem*/ ctx[27].end_date.rendered + "")) set_data(t3, t3_value);
+    			if (dirty[0] & /*A*/ 1 && t1_value !== (t1_value = /*listItem*/ ctx[27].start_date?.rendered + "")) set_data(t1, t1_value);
+    			if (dirty[0] & /*A*/ 1 && t3_value !== (t3_value = /*listItem*/ ctx[27].end_date?.rendered + "")) set_data(t3, t3_value);
     		},
     		d(detaching) {
     			if (detaching) detach(t0);
@@ -8956,7 +8882,7 @@ var app = (function () {
     	};
     }
 
-    // (245:8) {#if listItem.facebook}
+    // (246:8) {#if listItem.facebook}
     function create_if_block_3$6(ctx) {
     	let a;
     	let i;
@@ -8986,8 +8912,8 @@ var app = (function () {
     	};
     }
 
-    // (248:8) {#if listItem.website}
-    function create_if_block_2$9(ctx) {
+    // (249:8) {#if listItem.website}
+    function create_if_block_2$8(ctx) {
     	let a;
     	let i;
     	let a_href_value;
@@ -9016,7 +8942,7 @@ var app = (function () {
     	};
     }
 
-    // (251:8) {#if listItem.email}
+    // (252:8) {#if listItem.email}
     function create_if_block_1$9(ctx) {
     	let a;
     	let i;
@@ -9051,13 +8977,7 @@ var app = (function () {
     	let div15;
     	let div1;
     	let div0;
-    	let t0_value = timeState(/*listItem*/ ctx[27].start_date.raw, /*listItem*/ ctx[27].end_date.raw) + "";
     	let t0;
-    	let br;
-    	let t1;
-    	let p0;
-    	let raw0_value = writeWeather(/*listItem*/ ctx[27].start_date.raw) + "";
-    	let t2;
     	let div14;
     	let div13;
     	let div12;
@@ -9065,41 +8985,42 @@ var app = (function () {
     	let div2;
     	let img;
     	let img_src_value;
-    	let t3;
+    	let t1;
     	let div11;
     	let div9;
     	let div6;
     	let div4;
     	let figure;
-    	let t4;
+    	let t2;
     	let div5;
+    	let p0;
+    	let raw_value = /*listItem*/ ctx[27].title.rendered.trim().replace("**", "<br>") + "";
+    	let t3;
     	let p1;
-    	let raw1_value = /*listItem*/ ctx[27].title.rendered.trim().replace("**", "<br>") + "";
+    	let t4_value = /*listItem*/ ctx[27].street.split(",")[0].trim() + "";
+    	let t4;
     	let t5;
-    	let p2;
-    	let t6_value = /*listItem*/ ctx[27].street.split(",")[0].trim() + "";
     	let t6;
     	let t7;
-    	let t8;
-    	let t9;
     	let div8;
     	let div7;
-    	let t10;
+    	let t8;
     	let div10;
-    	let t11;
+    	let t9;
     	let button;
-    	let t13;
+    	let t11;
     	let footer;
     	let a;
+    	let t13;
+    	let t14;
     	let t15;
     	let t16;
-    	let t17;
-    	let t18;
     	let div15_id_value;
     	let div15_categorie_value;
     	let div15_idplace_value;
     	let mounted;
     	let dispose;
+    	let if_block0 = /*listItem*/ ctx[27].start_date?.raw && create_if_block_8(ctx);
 
     	function click_handler_1() {
     		return /*click_handler_1*/ ctx[18](/*index*/ ctx[29]);
@@ -9112,7 +9033,7 @@ var app = (function () {
     		each_blocks_1[i] = create_each_block_2(get_each_context_2(ctx, each_value_2, i));
     	}
 
-    	let if_block0 = /*listItem*/ ctx[27].tlphone && create_if_block_6(ctx);
+    	let if_block1 = /*listItem*/ ctx[27].tlphone && create_if_block_6(ctx);
     	let each_value_1 = /*listItem*/ ctx[27].post_category;
     	let each_blocks = [];
 
@@ -9121,12 +9042,12 @@ var app = (function () {
     	}
 
     	function select_block_type_4(ctx, dirty) {
-    		if (/*listItem*/ ctx[27].start_date.rendered != /*listItem*/ ctx[27].end_date.rendered) return create_if_block_4$5;
+    		if (/*listItem*/ ctx[27].start_date?.rendered != /*listItem*/ ctx[27].end_date?.rendered) return create_if_block_4$5;
     		return create_else_block$5;
     	}
 
     	let current_block_type = select_block_type_4(ctx);
-    	let if_block1 = current_block_type(ctx);
+    	let if_block2 = current_block_type(ctx);
 
     	function click_handler_2() {
     		return /*click_handler_2*/ ctx[19](/*index*/ ctx[29]);
@@ -9136,27 +9057,24 @@ var app = (function () {
     		return /*click_handler_3*/ ctx[20](/*index*/ ctx[29]);
     	}
 
-    	let if_block2 = /*listItem*/ ctx[27].facebook && create_if_block_3$6(ctx);
-    	let if_block3 = /*listItem*/ ctx[27].website && create_if_block_2$9(ctx);
-    	let if_block4 = /*listItem*/ ctx[27].email && create_if_block_1$9(ctx);
+    	let if_block3 = /*listItem*/ ctx[27].facebook && create_if_block_3$6(ctx);
+    	let if_block4 = /*listItem*/ ctx[27].website && create_if_block_2$8(ctx);
+    	let if_block5 = /*listItem*/ ctx[27].email && create_if_block_1$9(ctx);
 
     	return {
     		c() {
     			div15 = element("div");
     			div1 = element("div");
     			div0 = element("div");
-    			t0 = text(t0_value);
-    			br = element("br");
-    			t1 = space();
-    			p0 = element("p");
-    			t2 = space();
+    			if (if_block0) if_block0.c();
+    			t0 = space();
     			div14 = element("div");
     			div13 = element("div");
     			div12 = element("div");
     			div3 = element("div");
     			div2 = element("div");
     			img = element("img");
-    			t3 = space();
+    			t1 = space();
     			div11 = element("div");
     			div9 = element("div");
     			div6 = element("div");
@@ -9167,43 +9085,41 @@ var app = (function () {
     				each_blocks_1[i].c();
     			}
 
-    			t4 = space();
+    			t2 = space();
     			div5 = element("div");
+    			p0 = element("p");
+    			t3 = space();
     			p1 = element("p");
+    			t4 = text(t4_value);
     			t5 = space();
-    			p2 = element("p");
-    			t6 = text(t6_value);
-    			t7 = space();
-    			if (if_block0) if_block0.c();
-    			t8 = space();
+    			if (if_block1) if_block1.c();
+    			t6 = space();
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
 
-    			t9 = space();
+    			t7 = space();
     			div8 = element("div");
     			div7 = element("div");
-    			if_block1.c();
-    			t10 = space();
+    			if_block2.c();
+    			t8 = space();
     			div10 = element("div");
     			div10.innerHTML = `<p class="has-text-left puce plie svelte-1njr46c"></p>`;
-    			t11 = space();
+    			t9 = space();
     			button = element("button");
     			button.textContent = "＋";
-    			t13 = space();
+    			t11 = space();
     			footer = element("footer");
     			a = element("a");
     			a.textContent = "+ d'infos";
-    			t15 = space();
-    			if (if_block2) if_block2.c();
-    			t16 = space();
+    			t13 = space();
     			if (if_block3) if_block3.c();
-    			t17 = space();
+    			t14 = space();
     			if (if_block4) if_block4.c();
-    			t18 = space();
-    			attr(br, "class", "svelte-1njr46c");
-    			attr(p0, "class", "is-size-6 is-size-7-touch svelte-1njr46c");
+    			t15 = space();
+    			if (if_block5) if_block5.c();
+    			t16 = space();
     			attr(div0, "class", "marker-text is-size-6-mobile is-size-3-tablet is-size-3 svelte-1njr46c");
     			set_style(div0, "line-height", "1.2em");
     			attr(div1, "class", "timeline-marker is-warning svelte-1njr46c");
@@ -9214,8 +9130,8 @@ var app = (function () {
     			attr(div3, "class", "card-image svelte-1njr46c");
     			attr(figure, "class", "image picto svelte-1njr46c");
     			attr(div4, "class", "media-left is-hidden-touch svelte-1njr46c");
-    			attr(p1, "class", "title is-4 is-6-max svelte-1njr46c");
-    			attr(p2, "class", "subtitle is-6 is-8-max is-size-7-touch svelte-1njr46c");
+    			attr(p0, "class", "title is-4 is-6-max svelte-1njr46c");
+    			attr(p1, "class", "subtitle is-6 is-8-max is-size-7-touch svelte-1njr46c");
     			attr(div5, "class", "media-content svelte-1njr46c");
     			attr(div6, "class", "media svelte-1njr46c");
     			attr(div7, "class", "sousrouvre-event has-background-primary is-size-5 is-size-7-touch svelte-1njr46c");
@@ -9241,19 +9157,15 @@ var app = (function () {
     			insert(target, div15, anchor);
     			append(div15, div1);
     			append(div1, div0);
-    			append(div0, t0);
-    			append(div0, br);
-    			append(div0, t1);
-    			append(div0, p0);
-    			p0.innerHTML = raw0_value;
-    			append(div15, t2);
+    			if (if_block0) if_block0.m(div0, null);
+    			append(div15, t0);
     			append(div15, div14);
     			append(div14, div13);
     			append(div13, div12);
     			append(div12, div3);
     			append(div3, div2);
     			append(div2, img);
-    			append(div12, t3);
+    			append(div12, t1);
     			append(div12, div11);
     			append(div11, div9);
     			append(div9, div6);
@@ -9264,39 +9176,39 @@ var app = (function () {
     				each_blocks_1[i].m(figure, null);
     			}
 
-    			append(div6, t4);
+    			append(div6, t2);
     			append(div6, div5);
+    			append(div5, p0);
+    			p0.innerHTML = raw_value;
+    			append(div5, t3);
     			append(div5, p1);
-    			p1.innerHTML = raw1_value;
+    			append(p1, t4);
     			append(div5, t5);
-    			append(div5, p2);
-    			append(p2, t6);
-    			append(div5, t7);
-    			if (if_block0) if_block0.m(div5, null);
-    			append(div5, t8);
+    			if (if_block1) if_block1.m(div5, null);
+    			append(div5, t6);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].m(div5, null);
     			}
 
-    			append(div9, t9);
+    			append(div9, t7);
     			append(div9, div8);
     			append(div8, div7);
-    			if_block1.m(div7, null);
-    			append(div11, t10);
+    			if_block2.m(div7, null);
+    			append(div11, t8);
     			append(div11, div10);
-    			append(div11, t11);
+    			append(div11, t9);
     			append(div11, button);
-    			append(div11, t13);
+    			append(div11, t11);
     			append(div11, footer);
     			append(footer, a);
-    			append(footer, t15);
-    			if (if_block2) if_block2.m(footer, null);
-    			append(footer, t16);
+    			append(footer, t13);
     			if (if_block3) if_block3.m(footer, null);
-    			append(footer, t17);
+    			append(footer, t14);
     			if (if_block4) if_block4.m(footer, null);
-    			append(div14, t18);
+    			append(footer, t15);
+    			if (if_block5) if_block5.m(footer, null);
+    			append(div14, t16);
 
     			if (!mounted) {
     				dispose = [
@@ -9310,8 +9222,20 @@ var app = (function () {
     		},
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
-    			if (dirty[0] & /*A*/ 1 && t0_value !== (t0_value = timeState(/*listItem*/ ctx[27].start_date.raw, /*listItem*/ ctx[27].end_date.raw) + "")) set_data(t0, t0_value);
-    			if (dirty[0] & /*A*/ 1 && raw0_value !== (raw0_value = writeWeather(/*listItem*/ ctx[27].start_date.raw) + "")) p0.innerHTML = raw0_value;
+
+    			if (/*listItem*/ ctx[27].start_date?.raw) {
+    				if (if_block0) {
+    					if_block0.p(ctx, dirty);
+    				} else {
+    					if_block0 = create_if_block_8(ctx);
+    					if_block0.c();
+    					if_block0.m(div0, null);
+    				}
+    			} else if (if_block0) {
+    				if_block0.d(1);
+    				if_block0 = null;
+    			}
+
     			if (dirty[0] & /*A*/ 1 && !src_url_equal(img.src, img_src_value = /*listItem*/ ctx[27].featured_image.src || './imageavenir.jpg')) {
     				attr(img, "src", img_src_value);
     			}
@@ -9339,19 +9263,19 @@ var app = (function () {
     				each_blocks_1.length = each_value_2.length;
     			}
 
-    			if (dirty[0] & /*A*/ 1 && raw1_value !== (raw1_value = /*listItem*/ ctx[27].title.rendered.trim().replace("**", "<br>") + "")) p1.innerHTML = raw1_value;			if (dirty[0] & /*A*/ 1 && t6_value !== (t6_value = /*listItem*/ ctx[27].street.split(",")[0].trim() + "")) set_data(t6, t6_value);
+    			if (dirty[0] & /*A*/ 1 && raw_value !== (raw_value = /*listItem*/ ctx[27].title.rendered.trim().replace("**", "<br>") + "")) p0.innerHTML = raw_value;			if (dirty[0] & /*A*/ 1 && t4_value !== (t4_value = /*listItem*/ ctx[27].street.split(",")[0].trim() + "")) set_data(t4, t4_value);
 
     			if (/*listItem*/ ctx[27].tlphone) {
-    				if (if_block0) {
-    					if_block0.p(ctx, dirty);
+    				if (if_block1) {
+    					if_block1.p(ctx, dirty);
     				} else {
-    					if_block0 = create_if_block_6(ctx);
-    					if_block0.c();
-    					if_block0.m(div5, t8);
+    					if_block1 = create_if_block_6(ctx);
+    					if_block1.c();
+    					if_block1.m(div5, t6);
     				}
-    			} else if (if_block0) {
-    				if_block0.d(1);
-    				if_block0 = null;
+    			} else if (if_block1) {
+    				if_block1.d(1);
+    				if_block1 = null;
     			}
 
     			if (dirty[0] & /*A*/ 1) {
@@ -9377,55 +9301,55 @@ var app = (function () {
     				each_blocks.length = each_value_1.length;
     			}
 
-    			if (current_block_type === (current_block_type = select_block_type_4(ctx)) && if_block1) {
-    				if_block1.p(ctx, dirty);
+    			if (current_block_type === (current_block_type = select_block_type_4(ctx)) && if_block2) {
+    				if_block2.p(ctx, dirty);
     			} else {
-    				if_block1.d(1);
-    				if_block1 = current_block_type(ctx);
+    				if_block2.d(1);
+    				if_block2 = current_block_type(ctx);
 
-    				if (if_block1) {
-    					if_block1.c();
-    					if_block1.m(div7, null);
+    				if (if_block2) {
+    					if_block2.c();
+    					if_block2.m(div7, null);
     				}
     			}
 
     			if (/*listItem*/ ctx[27].facebook) {
-    				if (if_block2) {
-    					if_block2.p(ctx, dirty);
-    				} else {
-    					if_block2 = create_if_block_3$6(ctx);
-    					if_block2.c();
-    					if_block2.m(footer, t16);
-    				}
-    			} else if (if_block2) {
-    				if_block2.d(1);
-    				if_block2 = null;
-    			}
-
-    			if (/*listItem*/ ctx[27].website) {
     				if (if_block3) {
     					if_block3.p(ctx, dirty);
     				} else {
-    					if_block3 = create_if_block_2$9(ctx);
+    					if_block3 = create_if_block_3$6(ctx);
     					if_block3.c();
-    					if_block3.m(footer, t17);
+    					if_block3.m(footer, t14);
     				}
     			} else if (if_block3) {
     				if_block3.d(1);
     				if_block3 = null;
     			}
 
-    			if (/*listItem*/ ctx[27].email) {
+    			if (/*listItem*/ ctx[27].website) {
     				if (if_block4) {
     					if_block4.p(ctx, dirty);
     				} else {
-    					if_block4 = create_if_block_1$9(ctx);
+    					if_block4 = create_if_block_2$8(ctx);
     					if_block4.c();
-    					if_block4.m(footer, null);
+    					if_block4.m(footer, t15);
     				}
     			} else if (if_block4) {
     				if_block4.d(1);
     				if_block4 = null;
+    			}
+
+    			if (/*listItem*/ ctx[27].email) {
+    				if (if_block5) {
+    					if_block5.p(ctx, dirty);
+    				} else {
+    					if_block5 = create_if_block_1$9(ctx);
+    					if_block5.c();
+    					if_block5.m(footer, null);
+    				}
+    			} else if (if_block5) {
+    				if_block5.d(1);
+    				if_block5 = null;
     			}
 
     			if (dirty[0] & /*$activeListItem, $activeMapItem*/ 768) {
@@ -9438,13 +9362,14 @@ var app = (function () {
     		},
     		d(detaching) {
     			if (detaching) detach(div15);
-    			destroy_each(each_blocks_1, detaching);
     			if (if_block0) if_block0.d();
+    			destroy_each(each_blocks_1, detaching);
+    			if (if_block1) if_block1.d();
     			destroy_each(each_blocks, detaching);
-    			if_block1.d();
-    			if (if_block2) if_block2.d();
+    			if_block2.d();
     			if (if_block3) if_block3.d();
     			if (if_block4) if_block4.d();
+    			if (if_block5) if_block5.d();
     			mounted = false;
     			run_all(dispose);
     		}
@@ -9459,7 +9384,7 @@ var app = (function () {
     	let t3;
     	let t4;
     	let current;
-    	let if_block0 = /*active*/ ctx[2] && create_if_block_8(ctx);
+    	let if_block0 = /*active*/ ctx[2] && create_if_block_9(ctx);
     	let each_value = /*A*/ ctx[0];
     	let each_blocks = [];
 
@@ -9515,7 +9440,7 @@ var app = (function () {
     						transition_in(if_block0, 1);
     					}
     				} else {
-    					if_block0 = create_if_block_8(ctx);
+    					if_block0 = create_if_block_9(ctx);
     					if_block0.c();
     					transition_in(if_block0, 1);
     					if_block0.m(t0.parentNode, t0);
@@ -9705,12 +9630,12 @@ var app = (function () {
 
     function get_each_context$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[65] = list[i];
-    	child_ctx[67] = i;
+    	child_ctx[66] = list[i];
+    	child_ctx[68] = i;
     	return child_ctx;
     }
 
-    // (599:28) 
+    // (600:28) 
     function create_if_block_4$4(ctx) {
     	let div;
     	let t;
@@ -9734,7 +9659,7 @@ var app = (function () {
     	};
     }
 
-    // (579:4) {#if filteredListItems && filteredListItems.length > 0}
+    // (580:4) {#if filteredListItems && filteredListItems.length > 0}
     function create_if_block$c(ctx) {
     	let t;
     	let if_block_anchor;
@@ -9812,15 +9737,15 @@ var app = (function () {
     	};
     }
 
-    // (581:8) {#if maxItemsToShowInList <= 0 || i < maxItemsToShowInList}
-    function create_if_block_2$8(ctx) {
+    // (582:8) {#if maxItemsToShowInList <= 0 || i < maxItemsToShowInList}
+    function create_if_block_2$7(ctx) {
     	let div;
     	let div_class_value;
     	let mounted;
     	let dispose;
 
     	function select_block_type_1(ctx, dirty) {
-    		if (/*listItem*/ ctx[65].highlighted) return create_if_block_3$5;
+    		if (/*listItem*/ ctx[66].highlighted) return create_if_block_3$5;
     		return create_else_block$4;
     	}
 
@@ -9828,7 +9753,7 @@ var app = (function () {
     	let if_block = current_block_type(ctx);
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[38](/*listItem*/ ctx[65]);
+    		return /*click_handler*/ ctx[38](/*listItem*/ ctx[66]);
     	}
 
     	return {
@@ -9836,7 +9761,7 @@ var app = (function () {
     			div = element("div");
     			if_block.c();
 
-    			attr(div, "class", div_class_value = "autocomplete-list-item " + (/*i*/ ctx[67] === /*highlightIndex*/ ctx[12]
+    			attr(div, "class", div_class_value = "autocomplete-list-item " + (/*i*/ ctx[68] === /*highlightIndex*/ ctx[12]
     			? 'selected'
     			: '') + " svelte-1ulmu9s");
     		},
@@ -9864,7 +9789,7 @@ var app = (function () {
     				}
     			}
 
-    			if (dirty[0] & /*highlightIndex*/ 4096 && div_class_value !== (div_class_value = "autocomplete-list-item " + (/*i*/ ctx[67] === /*highlightIndex*/ ctx[12]
+    			if (dirty[0] & /*highlightIndex*/ 4096 && div_class_value !== (div_class_value = "autocomplete-list-item " + (/*i*/ ctx[68] === /*highlightIndex*/ ctx[12]
     			? 'selected'
     			: '') + " svelte-1ulmu9s")) {
     				attr(div, "class", div_class_value);
@@ -9879,10 +9804,10 @@ var app = (function () {
     	};
     }
 
-    // (587:12) {:else}
+    // (588:12) {:else}
     function create_else_block$4(ctx) {
     	let html_tag;
-    	let raw_value = /*listItem*/ ctx[65].label + "";
+    	let raw_value = /*listItem*/ ctx[66].label + "";
     	let html_anchor;
 
     	return {
@@ -9896,7 +9821,7 @@ var app = (function () {
     			insert(target, html_anchor, anchor);
     		},
     		p(ctx, dirty) {
-    			if (dirty[0] & /*filteredListItems*/ 8192 && raw_value !== (raw_value = /*listItem*/ ctx[65].label + "")) html_tag.p(raw_value);
+    			if (dirty[0] & /*filteredListItems*/ 8192 && raw_value !== (raw_value = /*listItem*/ ctx[66].label + "")) html_tag.p(raw_value);
     		},
     		d(detaching) {
     			if (detaching) detach(html_anchor);
@@ -9905,10 +9830,10 @@ var app = (function () {
     	};
     }
 
-    // (585:12) {#if listItem.highlighted}
+    // (586:12) {#if listItem.highlighted}
     function create_if_block_3$5(ctx) {
     	let html_tag;
-    	let raw_value = /*listItem*/ ctx[65].highlighted.label + "";
+    	let raw_value = /*listItem*/ ctx[66].highlighted.label + "";
     	let html_anchor;
 
     	return {
@@ -9922,7 +9847,7 @@ var app = (function () {
     			insert(target, html_anchor, anchor);
     		},
     		p(ctx, dirty) {
-    			if (dirty[0] & /*filteredListItems*/ 8192 && raw_value !== (raw_value = /*listItem*/ ctx[65].highlighted.label + "")) html_tag.p(raw_value);
+    			if (dirty[0] & /*filteredListItems*/ 8192 && raw_value !== (raw_value = /*listItem*/ ctx[66].highlighted.label + "")) html_tag.p(raw_value);
     		},
     		d(detaching) {
     			if (detaching) detach(html_anchor);
@@ -9931,10 +9856,10 @@ var app = (function () {
     	};
     }
 
-    // (580:6) {#each filteredListItems as listItem, i}
+    // (581:6) {#each filteredListItems as listItem, i}
     function create_each_block$2(ctx) {
     	let if_block_anchor;
-    	let if_block = (/*maxItemsToShowInList*/ ctx[1] <= 0 || /*i*/ ctx[67] < /*maxItemsToShowInList*/ ctx[1]) && create_if_block_2$8(ctx);
+    	let if_block = (/*maxItemsToShowInList*/ ctx[1] <= 0 || /*i*/ ctx[68] < /*maxItemsToShowInList*/ ctx[1]) && create_if_block_2$7(ctx);
 
     	return {
     		c() {
@@ -9946,11 +9871,11 @@ var app = (function () {
     			insert(target, if_block_anchor, anchor);
     		},
     		p(ctx, dirty) {
-    			if (/*maxItemsToShowInList*/ ctx[1] <= 0 || /*i*/ ctx[67] < /*maxItemsToShowInList*/ ctx[1]) {
+    			if (/*maxItemsToShowInList*/ ctx[1] <= 0 || /*i*/ ctx[68] < /*maxItemsToShowInList*/ ctx[1]) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block_2$8(ctx);
+    					if_block = create_if_block_2$7(ctx);
     					if_block.c();
     					if_block.m(if_block_anchor.parentNode, if_block_anchor);
     				}
@@ -9966,7 +9891,7 @@ var app = (function () {
     	};
     }
 
-    // (594:6) {#if maxItemsToShowInList > 0 && filteredListItems.length > maxItemsToShowInList}
+    // (595:6) {#if maxItemsToShowInList > 0 && filteredListItems.length > maxItemsToShowInList}
     function create_if_block_1$8(ctx) {
     	let div;
     	let t0;
@@ -10155,6 +10080,7 @@ var app = (function () {
 
     function instance$m($$self, $$props, $$invalidate) {
     	let { items } = $$props;
+    	const dispatch = createEventDispatcher();
     	let { labelFieldName = undefined } = $$props;
     	let { keywordsFieldName = labelFieldName } = $$props;
     	let { valueFieldName = undefined } = $$props;
@@ -10377,6 +10303,7 @@ var app = (function () {
     		const newSelectedItem = listItem.item;
 
     		if (beforeChange(selectedItem, newSelectedItem)) {
+    			dispatch("update");
     			$$invalidate(20, selectedItem = newSelectedItem);
     		}
     	}
@@ -11064,7 +10991,7 @@ var app = (function () {
     	let dispose;
     	let if_block0 = /*title*/ ctx[2] && create_if_block_4$3(ctx);
     	let if_block1 = /*icon*/ ctx[6] && create_if_block_3$4(ctx);
-    	let if_block2 = /*hasInput*/ ctx[8] && create_if_block_2$7(ctx);
+    	let if_block2 = /*hasInput*/ ctx[8] && create_if_block_2$6(ctx);
     	let if_block3 = /*showCancel*/ ctx[9] && create_if_block_1$7(ctx);
 
     	return {
@@ -11179,7 +11106,7 @@ var app = (function () {
     				if (if_block2) {
     					if_block2.p(ctx, dirty);
     				} else {
-    					if_block2 = create_if_block_2$7(ctx);
+    					if_block2 = create_if_block_2$6(ctx);
     					if_block2.c();
     					if_block2.m(div1, null);
     				}
@@ -11329,7 +11256,7 @@ var app = (function () {
     }
 
     // (231:12) {#if hasInput}
-    function create_if_block_2$7(ctx) {
+    function create_if_block_2$6(ctx) {
     	let div1;
     	let div0;
     	let input_1;
@@ -12066,7 +11993,7 @@ var app = (function () {
     }
 
     // (181:2) {#if icon}
-    function create_if_block_2$6(ctx) {
+    function create_if_block_2$5(ctx) {
     	let icon_1;
     	let current;
 
@@ -12215,7 +12142,7 @@ var app = (function () {
 
     	let current_block_type = select_block_type(ctx);
     	let if_block0 = current_block_type(ctx);
-    	let if_block1 = /*icon*/ ctx[8] && create_if_block_2$6(ctx);
+    	let if_block1 = /*icon*/ ctx[8] && create_if_block_2$5(ctx);
     	let if_block2 = !/*loading*/ ctx[7] && (/*passwordReveal*/ ctx[4] || /*statusType*/ ctx[11]) && create_if_block_1$6(ctx);
     	let if_block3 = /*maxlength*/ ctx[5] && /*hasCounter*/ ctx[6] && /*type*/ ctx[1] !== 'number' && create_if_block$9(ctx);
 
@@ -12267,7 +12194,7 @@ var app = (function () {
     						transition_in(if_block1, 1);
     					}
     				} else {
-    					if_block1 = create_if_block_2$6(ctx);
+    					if_block1 = create_if_block_2$5(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
     					if_block1.m(div, t1);
@@ -12842,7 +12769,7 @@ var app = (function () {
     	let if_block_anchor;
 
     	function select_block_type(ctx, dirty) {
-    		if (/*showHeader*/ ctx[5]) return create_if_block_2$5;
+    		if (/*showHeader*/ ctx[5]) return create_if_block_2$4;
     		return create_else_block$2;
     	}
 
@@ -12910,7 +12837,7 @@ var app = (function () {
     }
 
     // (71:8) {#if showHeader}
-    function create_if_block_2$5(ctx) {
+    function create_if_block_2$4(ctx) {
     	let button;
     	let mounted;
     	let dispose;
@@ -13516,7 +13443,7 @@ var app = (function () {
     	let article_class_value;
     	let article_transition;
     	let current;
-    	let if_block0 = /*showClose*/ ctx[2] && create_if_block_2$4(ctx);
+    	let if_block0 = /*showClose*/ ctx[2] && create_if_block_2$3(ctx);
     	let if_block1 = /*icon*/ ctx[3] && create_if_block_1$4(ctx);
     	const default_slot_template = /*#slots*/ ctx[11].default;
     	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[10], null);
@@ -13555,7 +13482,7 @@ var app = (function () {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
-    					if_block0 = create_if_block_2$4(ctx);
+    					if_block0 = create_if_block_2$3(ctx);
     					if_block0.c();
     					if_block0.m(article, t0);
     				}
@@ -13642,7 +13569,7 @@ var app = (function () {
     }
 
     // (94:4) {#if showClose}
-    function create_if_block_2$4(ctx) {
+    function create_if_block_2$3(ctx) {
     	let button;
     	let mounted;
     	let dispose;
@@ -15896,7 +15823,7 @@ var app = (function () {
 
     /* node_modules\svelma-pro\src\components\Datepicker\Selector\MonthTitle.svelte generated by Svelte v3.44.1 */
 
-    function create_if_block_2$3(ctx) {
+    function create_if_block_2$2(ctx) {
     	let div;
     	let t0;
     	let t1;
@@ -16109,7 +16036,7 @@ var app = (function () {
     	let current;
     	let mounted;
     	let dispose;
-    	const if_block_creators = [create_if_block$4, create_if_block_1$3, create_if_block_2$3];
+    	const if_block_creators = [create_if_block$4, create_if_block_1$3, create_if_block_2$2];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -16983,7 +16910,7 @@ var app = (function () {
     	let mounted;
     	let dispose;
     	selector = new Selector({});
-    	const if_block_creators = [create_if_block_1$2, create_if_block_2$2, create_if_block_3$1];
+    	const if_block_creators = [create_if_block_1$2, create_if_block_2$1, create_if_block_3$1];
     	const if_blocks = [];
 
     	function select_block_type_1(ctx, dirty) {
@@ -17122,7 +17049,7 @@ var app = (function () {
     }
 
     // (296:30) 
-    function create_if_block_2$2(ctx) {
+    function create_if_block_2$1(ctx) {
     	let monthview;
     	let updating_result;
     	let current;
@@ -27610,15 +27537,14 @@ var app = (function () {
     	let current;
 
     	function autocomplete_selectedItem_binding(value) {
-    		/*autocomplete_selectedItem_binding*/ ctx[14](value);
+    		/*autocomplete_selectedItem_binding*/ ctx[13](value);
     	}
 
     	let autocomplete_props = {
     		items: /*items*/ ctx[2],
     		placeholder: '🔍',
     		className: "has-background-primary",
-    		labelFieldName: "name",
-    		onChange: /*func*/ ctx[13]
+    		labelFieldName: "name"
     	};
 
     	if (/*$selectedItem*/ ctx[5] !== void 0) {
@@ -27627,6 +27553,7 @@ var app = (function () {
 
     	autocomplete = new Autocomplete({ props: autocomplete_props });
     	binding_callbacks.push(() => bind$3(autocomplete, 'selectedItem', autocomplete_selectedItem_binding));
+    	autocomplete.$on("update", /*update_handler*/ ctx[14]);
     	let if_block = /*$selectedItem*/ ctx[5].id && create_if_block_5(ctx);
 
     	return {
@@ -27695,7 +27622,7 @@ var app = (function () {
     	};
     }
 
-    // (72:2) {#if $selectedItem.id}
+    // (77:2) {#if $selectedItem.id}
     function create_if_block_5(ctx) {
     	let span;
     	let mounted;
@@ -27724,8 +27651,8 @@ var app = (function () {
     	};
     }
 
-    // (97:8) {#if !$mobileViewport.touch.matches}
-    function create_if_block_2$1(ctx) {
+    // (104:8) {#if !$mobileViewport.touch.matches}
+    function create_if_block_2(ctx) {
     	let div;
     	let autocomplete;
     	let updating_selectedItem;
@@ -27733,15 +27660,14 @@ var app = (function () {
     	let current;
 
     	function autocomplete_selectedItem_binding_1(value) {
-    		/*autocomplete_selectedItem_binding_1*/ ctx[20](value);
+    		/*autocomplete_selectedItem_binding_1*/ ctx[18](value);
     	}
 
     	let autocomplete_props = {
     		items: /*items*/ ctx[2],
     		placeholder: `${/*placeholder*/ ctx[7][/*toggle*/ ctx[1]]}recherchez-vous ?`,
     		className: "filtre",
-    		labelFieldName: "name",
-    		onChange: /*func_1*/ ctx[19]
+    		labelFieldName: "name"
     	};
 
     	if (/*$selectedItem*/ ctx[5] !== void 0) {
@@ -27750,6 +27676,7 @@ var app = (function () {
 
     	autocomplete = new Autocomplete({ props: autocomplete_props });
     	binding_callbacks.push(() => bind$3(autocomplete, 'selectedItem', autocomplete_selectedItem_binding_1));
+    	autocomplete.$on("update", /*update_handler_1*/ ctx[19]);
     	let if_block = /*$selectedItem*/ ctx[5].id && create_if_block_3(ctx);
 
     	return {
@@ -27815,7 +27742,7 @@ var app = (function () {
     	};
     }
 
-    // (108:12) {#if $selectedItem.id}
+    // (115:12) {#if $selectedItem.id}
     function create_if_block_3(ctx) {
     	let span;
     	let mounted;
@@ -27844,7 +27771,7 @@ var app = (function () {
     	};
     }
 
-    // (118:8) {#if toggle=="events"}
+    // (125:8) {#if toggle=="events"}
     function create_if_block$2(ctx) {
     	let datepicker;
     	let updating_pickerResult;
@@ -27853,7 +27780,7 @@ var app = (function () {
     	let current;
 
     	function datepicker_pickerResult_binding(value) {
-    		/*datepicker_pickerResult_binding*/ ctx[21](value);
+    		/*datepicker_pickerResult_binding*/ ctx[20](value);
     	}
 
     	let datepicker_props = {
@@ -27869,7 +27796,7 @@ var app = (function () {
 
     	datepicker = new Datepicker({ props: datepicker_props });
     	binding_callbacks.push(() => bind$3(datepicker, 'pickerResult', datepicker_pickerResult_binding));
-    	datepicker.$on("dateChecked", /*dateChecked_handler*/ ctx[22]);
+    	datepicker.$on("dateChecked", /*dateChecked_handler*/ ctx[21]);
     	let if_block = /*filtreDateIsOn*/ ctx[4] && create_if_block_1$1(ctx);
 
     	return {
@@ -27928,7 +27855,7 @@ var app = (function () {
     	};
     }
 
-    // (124:10) {#if filtreDateIsOn}
+    // (131:10) {#if filtreDateIsOn}
     function create_if_block_1$1(ctx) {
     	let span;
     	let mounted;
@@ -27981,28 +27908,22 @@ var app = (function () {
     	let t8;
     	let hr2;
     	let t9;
-    	let button3;
     	let t10;
-    	let button3_disabled_value;
-    	let t11;
-    	let hr3;
-    	let t12;
-    	let t13;
     	let div0;
-    	let t14;
+    	let t11;
     	let div4;
     	let div2;
-    	let button4;
-    	let t16;
+    	let button3;
+    	let t13;
     	let div3;
-    	let t17;
+    	let t14;
     	let div6;
-    	let button5;
+    	let button4;
     	let current;
     	let mounted;
     	let dispose;
     	let if_block0 = /*$mobileViewport*/ ctx[6].touch.matches && create_if_block_4(ctx);
-    	let if_block1 = !/*$mobileViewport*/ ctx[6].touch.matches && create_if_block_2$1(ctx);
+    	let if_block1 = !/*$mobileViewport*/ ctx[6].touch.matches && create_if_block_2(ctx);
     	let if_block2 = /*toggle*/ ctx[1] == "events" && create_if_block$2(ctx);
 
     	return {
@@ -28023,32 +27944,27 @@ var app = (function () {
     			hr1 = element("hr");
     			t6 = space();
     			button2 = element("button");
-    			t7 = text("Prof. libérales");
+    			t7 = text("Evénements");
     			t8 = space();
     			hr2 = element("hr");
     			t9 = space();
-    			button3 = element("button");
-    			t10 = text("Evénements");
-    			t11 = space();
-    			hr3 = element("hr");
-    			t12 = space();
     			if (if_block1) if_block1.c();
-    			t13 = space();
+    			t10 = space();
     			div0 = element("div");
     			if (if_block2) if_block2.c();
-    			t14 = space();
+    			t11 = space();
     			div4 = element("div");
     			div2 = element("div");
-    			button4 = element("button");
-    			button4.textContent = "Nous contacter";
-    			t16 = space();
+    			button3 = element("button");
+    			button3.textContent = "Nous contacter";
+    			t13 = space();
     			div3 = element("div");
     			div3.innerHTML = `<img src="./logomin.svg" alt="taverneasy" width="auto" height="38px"/>`;
-    			t17 = space();
+    			t14 = space();
     			div6 = element("div");
-    			button5 = element("button");
+    			button4 = element("button");
 
-    			button5.innerHTML = `<span aria-hidden="true"></span> 
+    			button4.innerHTML = `<span aria-hidden="true"></span> 
         <span aria-hidden="true"></span> 
         <span aria-hidden="true"></span>`;
 
@@ -28057,30 +27973,27 @@ var app = (function () {
     			button0.disabled = button0_disabled_value = /*toggle*/ ctx[1] == 'commerces';
     			attr(hr0, "class", "navbar-divider svelte-8z6rii");
     			attr(button1, "class", "button navbar-item is-size-6 is-warning is-outlined menuitem-mobile svelte-8z6rii");
-    			button1.disabled = button1_disabled_value = /*toggle*/ ctx[1] == 'associations';
+    			button1.disabled = button1_disabled_value = /*toggle*/ ctx[1] == 'places';
     			attr(hr1, "class", "navbar-divider svelte-8z6rii");
     			attr(button2, "class", "button navbar-item is-size-6 is-warning is-outlined menuitem-mobile svelte-8z6rii");
-    			button2.disabled = button2_disabled_value = /*toggle*/ ctx[1] == 'liberales';
+    			button2.disabled = button2_disabled_value = /*toggle*/ ctx[1] == 'events';
     			attr(hr2, "class", "navbar-divider svelte-8z6rii");
-    			attr(button3, "class", "button navbar-item is-size-6 is-warning is-outlined menuitem-mobile svelte-8z6rii");
-    			button3.disabled = button3_disabled_value = /*toggle*/ ctx[1] == 'events';
-    			attr(hr3, "class", "navbar-divider svelte-8z6rii");
     			attr(div0, "class", "navbar-item datemax svelte-8z6rii");
     			attr(div1, "class", "navbar-start svelte-8z6rii");
-    			attr(button4, "id", "boutoncontact");
-    			attr(button4, "class", "button is-outlined is-warning navbar-item is-size-6 svelte-8z6rii");
-    			set_style(button4, "margin-right", "20px");
+    			attr(button3, "id", "boutoncontact");
+    			attr(button3, "class", "button is-outlined is-warning navbar-item is-size-6 svelte-8z6rii");
+    			set_style(button3, "margin-right", "20px");
     			attr(div2, "class", "navbar-item fitcontent svelte-8z6rii");
     			attr(div3, "class", "navbar-item logo is-hidden-mobile svelte-8z6rii");
     			attr(div4, "class", "navbar-end svelte-8z6rii");
     			attr(div5, "class", "navbar-menu svelte-8z6rii");
     			toggle_class(div5, "is-active", /*toggleMenu*/ ctx[0]);
-    			attr(button5, "role", "button");
-    			attr(button5, "class", "navbar-burger burger svelte-8z6rii");
-    			attr(button5, "aria-label", "menu");
-    			attr(button5, "aria-expanded", "false");
-    			attr(button5, "data-target", "navbarBasicExample");
-    			toggle_class(button5, "is-active", /*toggleMenu*/ ctx[0]);
+    			attr(button4, "role", "button");
+    			attr(button4, "class", "navbar-burger burger svelte-8z6rii");
+    			attr(button4, "aria-label", "menu");
+    			attr(button4, "aria-expanded", "false");
+    			attr(button4, "data-target", "navbarBasicExample");
+    			toggle_class(button4, "is-active", /*toggleMenu*/ ctx[0]);
     			attr(div6, "class", "navbar-brand svelte-8z6rii");
     			attr(nav, "class", "navbar is-primary svelte-8z6rii");
     			attr(nav, "role", "navigation");
@@ -28107,24 +28020,19 @@ var app = (function () {
     			append(div1, t8);
     			append(div1, hr2);
     			append(div1, t9);
-    			append(div1, button3);
-    			append(button3, t10);
-    			append(div1, t11);
-    			append(div1, hr3);
-    			append(div1, t12);
     			if (if_block1) if_block1.m(div1, null);
-    			append(div1, t13);
+    			append(div1, t10);
     			append(div1, div0);
     			if (if_block2) if_block2.m(div0, null);
-    			append(div5, t14);
+    			append(div5, t11);
     			append(div5, div4);
     			append(div4, div2);
-    			append(div2, button4);
-    			append(div4, t16);
+    			append(div2, button3);
+    			append(div4, t13);
     			append(div4, div3);
-    			append(nav, t17);
+    			append(nav, t14);
     			append(nav, div6);
-    			append(div6, button5);
+    			append(div6, button4);
     			current = true;
 
     			if (!mounted) {
@@ -28132,9 +28040,8 @@ var app = (function () {
     					listen(button0, "click", /*click_handler*/ ctx[15]),
     					listen(button1, "click", /*click_handler_1*/ ctx[16]),
     					listen(button2, "click", /*click_handler_2*/ ctx[17]),
-    					listen(button3, "click", /*click_handler_3*/ ctx[18]),
-    					listen(button4, "click", /*click_handler_4*/ ctx[23]),
-    					listen(button5, "click", /*click_handler_5*/ ctx[24])
+    					listen(button3, "click", /*click_handler_3*/ ctx[22]),
+    					listen(button4, "click", /*click_handler_4*/ ctx[23])
     				];
 
     				mounted = true;
@@ -28172,16 +28079,12 @@ var app = (function () {
     				button0.disabled = button0_disabled_value;
     			}
 
-    			if (!current || dirty & /*toggle*/ 2 && button1_disabled_value !== (button1_disabled_value = /*toggle*/ ctx[1] == 'associations')) {
+    			if (!current || dirty & /*toggle*/ 2 && button1_disabled_value !== (button1_disabled_value = /*toggle*/ ctx[1] == 'places')) {
     				button1.disabled = button1_disabled_value;
     			}
 
-    			if (!current || dirty & /*toggle*/ 2 && button2_disabled_value !== (button2_disabled_value = /*toggle*/ ctx[1] == 'liberales')) {
+    			if (!current || dirty & /*toggle*/ 2 && button2_disabled_value !== (button2_disabled_value = /*toggle*/ ctx[1] == 'events')) {
     				button2.disabled = button2_disabled_value;
-    			}
-
-    			if (!current || dirty & /*toggle*/ 2 && button3_disabled_value !== (button3_disabled_value = /*toggle*/ ctx[1] == 'events')) {
-    				button3.disabled = button3_disabled_value;
     			}
 
     			if (!/*$mobileViewport*/ ctx[6].touch.matches) {
@@ -28192,10 +28095,10 @@ var app = (function () {
     						transition_in(if_block1, 1);
     					}
     				} else {
-    					if_block1 = create_if_block_2$1(ctx);
+    					if_block1 = create_if_block_2(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
-    					if_block1.m(div1, t13);
+    					if_block1.m(div1, t10);
     				}
     			} else if (if_block1) {
     				group_outros();
@@ -28235,7 +28138,7 @@ var app = (function () {
     			}
 
     			if (dirty & /*toggleMenu*/ 1) {
-    				toggle_class(button5, "is-active", /*toggleMenu*/ ctx[0]);
+    				toggle_class(button4, "is-active", /*toggleMenu*/ ctx[0]);
     			}
     		},
     		i(local) {
@@ -28280,12 +28183,21 @@ var app = (function () {
     		"commerces": "Quel commerce ",
     		"events": "Quel événement ",
     		"liberales": "Quelle profession ",
-    		"associations": "Quelle association "
+    		"places": "Quelle association "
     	};
 
     	onMount(async () => {
-    		if (!items) $$invalidate(2, items = getItems(A, toggle));
+    		await refresh();
     	});
+
+    	let refresh = async () => {
+    		await tick();
+
+    		if (!items && A && A.length) {
+    			console.log("from NAV :: ", A);
+    			$$invalidate(2, items = getItems(A, toggle));
+    		}
+    	};
 
     	// DATA SWITCH /////////////////////////////////////////////////////////////
     	function switchData(text, mode) {
@@ -28319,23 +28231,22 @@ var app = (function () {
     		switchData('reset');
     	}
 
-    	const func = () => switchData('update');
-
     	function autocomplete_selectedItem_binding(value) {
     		$selectedItem = value;
     		selectedItem.set($selectedItem);
     	}
 
+    	const update_handler = () => switchData('update');
     	const click_handler = () => switchData('switch', 'commerces');
-    	const click_handler_1 = () => switchData('switch', 'associations');
-    	const click_handler_2 = () => switchData('switch', 'liberales');
-    	const click_handler_3 = () => switchData('switch', 'events');
-    	const func_1 = () => switchData('update');
+    	const click_handler_1 = () => switchData('switch', 'places');
+    	const click_handler_2 = () => switchData('switch', 'events');
 
     	function autocomplete_selectedItem_binding_1(value) {
     		$selectedItem = value;
     		selectedItem.set($selectedItem);
     	}
+
+    	const update_handler_1 = () => switchData('update');
 
     	function datepicker_pickerResult_binding(value) {
     		pickerResult = value;
@@ -28343,8 +28254,8 @@ var app = (function () {
     	}
 
     	const dateChecked_handler = e => handleFiltreDate(e);
-    	const click_handler_4 = () => switchData('form');
-    	const click_handler_5 = () => $$invalidate(0, toggleMenu = !toggleMenu);
+    	const click_handler_3 = () => switchData('form');
+    	const click_handler_4 = () => $$invalidate(0, toggleMenu = !toggleMenu);
 
     	$$self.$$set = $$props => {
     		if ('toggle' in $$props) $$invalidate(1, toggle = $$props.toggle);
@@ -28354,9 +28265,9 @@ var app = (function () {
 
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*toggle, A*/ 4098) {
-    			toggle == 'events'
+    			toggle === 'events'
     			? $$invalidate(2, items = getEventsItems(A))
-    			: $$invalidate(2, items = getItems(A, toggle));
+    			: A.length && refresh();
     		}
     	};
 
@@ -28374,18 +28285,17 @@ var app = (function () {
     		handleFiltreDate,
     		resetFiltreDate,
     		A,
-    		func,
     		autocomplete_selectedItem_binding,
+    		update_handler,
     		click_handler,
     		click_handler_1,
     		click_handler_2,
-    		click_handler_3,
-    		func_1,
     		autocomplete_selectedItem_binding_1,
+    		update_handler_1,
     		datepicker_pickerResult_binding,
     		dateChecked_handler,
-    		click_handler_4,
-    		click_handler_5
+    		click_handler_3,
+    		click_handler_4
     	];
     }
 
@@ -28757,6 +28667,8 @@ var app = (function () {
 
     function create_else_block(ctx) {
     	let div1;
+    	let modal;
+    	let updating_active;
     	let t0;
     	let navigation;
     	let updating_A;
@@ -28765,11 +28677,30 @@ var app = (function () {
     	let t1;
     	let div0;
     	let current_block_type_index;
-    	let if_block1;
+    	let if_block;
     	let current;
     	let mounted;
     	let dispose;
-    	let if_block0 = /*fireForm*/ ctx[4] && create_if_block_2(ctx);
+
+    	function modal_active_binding(value) {
+    		/*modal_active_binding*/ ctx[14](value);
+    	}
+
+    	let modal_props = {
+    		closeText: "Annuler et revenir",
+    		title: "Faisons connaissance",
+    		width: "40vw",
+    		$$slots: { default: [create_default_slot] },
+    		$$scope: { ctx }
+    	};
+
+    	if (/*fireForm*/ ctx[5] !== void 0) {
+    		modal_props.active = /*fireForm*/ ctx[5];
+    	}
+
+    	modal = new Modal$1({ props: modal_props });
+    	binding_callbacks.push(() => bind$3(modal, 'active', modal_active_binding));
+    	modal.$on("close", /*close_handler*/ ctx[15]);
 
     	function navigation_A_binding(value) {
     		/*navigation_A_binding*/ ctx[16](value);
@@ -28789,8 +28720,8 @@ var app = (function () {
     		navigation_props.A = /*A*/ ctx[0];
     	}
 
-    	if (/*toggle*/ ctx[2] !== void 0) {
-    		navigation_props.toggle = /*toggle*/ ctx[2];
+    	if (/*toggle*/ ctx[3] !== void 0) {
+    		navigation_props.toggle = /*toggle*/ ctx[3];
     	}
 
     	if (/*toggleMenu*/ ctx[6] !== void 0) {
@@ -28806,28 +28737,28 @@ var app = (function () {
     	const if_blocks = [];
 
     	function select_block_type_1(ctx, dirty) {
-    		if (/*toggle*/ ctx[2] != "events") return 0;
+    		if (/*toggle*/ ctx[3] != "events" && /*ready*/ ctx[1] === true) return 0;
     		return 1;
     	}
 
     	current_block_type_index = select_block_type_1(ctx);
-    	if_block1 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    	if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
 
     	return {
     		c() {
     			div1 = element("div");
-    			if (if_block0) if_block0.c();
+    			create_component(modal.$$.fragment);
     			t0 = space();
     			create_component(navigation.$$.fragment);
     			t1 = space();
     			div0 = element("div");
-    			if_block1.c();
+    			if_block.c();
     			attr(div0, "class", "columns");
     			attr(div1, "class", "container");
     		},
     		m(target, anchor) {
     			insert(target, div1, anchor);
-    			if (if_block0) if_block0.m(div1, null);
+    			mount_component(modal, div1, null);
     			append(div1, t0);
     			mount_component(navigation, div1, null);
     			append(div1, t1);
@@ -28841,29 +28772,19 @@ var app = (function () {
     			}
     		},
     		p(ctx, dirty) {
-    			if (/*fireForm*/ ctx[4]) {
-    				if (if_block0) {
-    					if_block0.p(ctx, dirty);
+    			const modal_changes = {};
 
-    					if (dirty[0] & /*fireForm*/ 16) {
-    						transition_in(if_block0, 1);
-    					}
-    				} else {
-    					if_block0 = create_if_block_2(ctx);
-    					if_block0.c();
-    					transition_in(if_block0, 1);
-    					if_block0.m(div1, t0);
-    				}
-    			} else if (if_block0) {
-    				group_outros();
-
-    				transition_out(if_block0, 1, 1, () => {
-    					if_block0 = null;
-    				});
-
-    				check_outros();
+    			if (dirty[0] & /*fireForm*/ 32 | dirty[1] & /*$$scope*/ 128) {
+    				modal_changes.$$scope = { dirty, ctx };
     			}
 
+    			if (!updating_active && dirty[0] & /*fireForm*/ 32) {
+    				updating_active = true;
+    				modal_changes.active = /*fireForm*/ ctx[5];
+    				add_flush_callback(() => updating_active = false);
+    			}
+
+    			modal.$set(modal_changes);
     			const navigation_changes = {};
 
     			if (!updating_A && dirty[0] & /*A*/ 1) {
@@ -28872,9 +28793,9 @@ var app = (function () {
     				add_flush_callback(() => updating_A = false);
     			}
 
-    			if (!updating_toggle && dirty[0] & /*toggle*/ 4) {
+    			if (!updating_toggle && dirty[0] & /*toggle*/ 8) {
     				updating_toggle = true;
-    				navigation_changes.toggle = /*toggle*/ ctx[2];
+    				navigation_changes.toggle = /*toggle*/ ctx[3];
     				add_flush_callback(() => updating_toggle = false);
     			}
 
@@ -28898,35 +28819,35 @@ var app = (function () {
     				});
 
     				check_outros();
-    				if_block1 = if_blocks[current_block_type_index];
+    				if_block = if_blocks[current_block_type_index];
 
-    				if (!if_block1) {
-    					if_block1 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
-    					if_block1.c();
+    				if (!if_block) {
+    					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    					if_block.c();
     				} else {
-    					if_block1.p(ctx, dirty);
+    					if_block.p(ctx, dirty);
     				}
 
-    				transition_in(if_block1, 1);
-    				if_block1.m(div0, null);
+    				transition_in(if_block, 1);
+    				if_block.m(div0, null);
     			}
     		},
     		i(local) {
     			if (current) return;
-    			transition_in(if_block0);
+    			transition_in(modal.$$.fragment, local);
     			transition_in(navigation.$$.fragment, local);
-    			transition_in(if_block1);
+    			transition_in(if_block);
     			current = true;
     		},
     		o(local) {
-    			transition_out(if_block0);
+    			transition_out(modal.$$.fragment, local);
     			transition_out(navigation.$$.fragment, local);
-    			transition_out(if_block1);
+    			transition_out(if_block);
     			current = false;
     		},
     		d(detaching) {
     			if (detaching) detach(div1);
-    			if (if_block0) if_block0.d();
+    			destroy_component(modal);
     			destroy_component(navigation);
     			if_blocks[current_block_type_index].d();
     			mounted = false;
@@ -28935,7 +28856,7 @@ var app = (function () {
     	};
     }
 
-    // (105:1) {#if !ready}
+    // (134:1) {#if !ready}
     function create_if_block(ctx) {
     	let div2;
     	let div2_outro;
@@ -28972,71 +28893,7 @@ var app = (function () {
     	};
     }
 
-    // (115:2) {#if fireForm}
-    function create_if_block_2(ctx) {
-    	let modal;
-    	let updating_active;
-    	let current;
-
-    	function modal_active_binding(value) {
-    		/*modal_active_binding*/ ctx[14](value);
-    	}
-
-    	let modal_props = {
-    		closeText: "Annuler et revenir",
-    		title: "Faisons connaissance",
-    		width: "40vw",
-    		$$slots: { default: [create_default_slot] },
-    		$$scope: { ctx }
-    	};
-
-    	if (/*fireForm*/ ctx[4] !== void 0) {
-    		modal_props.active = /*fireForm*/ ctx[4];
-    	}
-
-    	modal = new Modal$1({ props: modal_props });
-    	binding_callbacks.push(() => bind$3(modal, 'active', modal_active_binding));
-    	modal.$on("close", /*close_handler*/ ctx[15]);
-
-    	return {
-    		c() {
-    			create_component(modal.$$.fragment);
-    		},
-    		m(target, anchor) {
-    			mount_component(modal, target, anchor);
-    			current = true;
-    		},
-    		p(ctx, dirty) {
-    			const modal_changes = {};
-
-    			if (dirty[0] & /*fireForm*/ 16 | dirty[1] & /*$$scope*/ 64) {
-    				modal_changes.$$scope = { dirty, ctx };
-    			}
-
-    			if (!updating_active && dirty[0] & /*fireForm*/ 16) {
-    				updating_active = true;
-    				modal_changes.active = /*fireForm*/ ctx[4];
-    				add_flush_callback(() => updating_active = false);
-    			}
-
-    			modal.$set(modal_changes);
-    		},
-    		i(local) {
-    			if (current) return;
-    			transition_in(modal.$$.fragment, local);
-    			current = true;
-    		},
-    		o(local) {
-    			transition_out(modal.$$.fragment, local);
-    			current = false;
-    		},
-    		d(detaching) {
-    			destroy_component(modal, detaching);
-    		}
-    	};
-    }
-
-    // (116:3) <Modal on:close="{() => fireForm = false}" closeText = "Annuler et revenir" title="Faisons connaissance" width="40vw" bind:active={fireForm}>
+    // (144:3) <Modal on:close="{() => fireForm = false}" closeText = "Annuler et revenir" title="Faisons connaissance" width="40vw" bind:active={fireForm}>
     function create_default_slot(ctx) {
     	let formidable;
     	let updating_fireForm;
@@ -29048,8 +28905,8 @@ var app = (function () {
 
     	let formidable_props = {};
 
-    	if (/*fireForm*/ ctx[4] !== void 0) {
-    		formidable_props.fireForm = /*fireForm*/ ctx[4];
+    	if (/*fireForm*/ ctx[5] !== void 0) {
+    		formidable_props.fireForm = /*fireForm*/ ctx[5];
     	}
 
     	formidable = new Formidable({ props: formidable_props });
@@ -29067,9 +28924,9 @@ var app = (function () {
     		p(ctx, dirty) {
     			const formidable_changes = {};
 
-    			if (!updating_fireForm && dirty[0] & /*fireForm*/ 16) {
+    			if (!updating_fireForm && dirty[0] & /*fireForm*/ 32) {
     				updating_fireForm = true;
-    				formidable_changes.fireForm = /*fireForm*/ ctx[4];
+    				formidable_changes.fireForm = /*fireForm*/ ctx[5];
     				add_flush_callback(() => updating_fireForm = false);
     			}
 
@@ -29090,7 +28947,7 @@ var app = (function () {
     	};
     }
 
-    // (131:3) {:else}
+    // (158:3) {:else}
     function create_else_block_1(ctx) {
     	let div0;
     	let events2;
@@ -29122,8 +28979,8 @@ var app = (function () {
     		events2_props.A = /*A*/ ctx[0];
     	}
 
-    	if (/*reset*/ ctx[3] !== void 0) {
-    		events2_props.reset = /*reset*/ ctx[3];
+    	if (/*reset*/ ctx[4] !== void 0) {
+    		events2_props.reset = /*reset*/ ctx[4];
     	}
 
     	events2 = new Events2({ props: events2_props });
@@ -29138,14 +28995,14 @@ var app = (function () {
     		/*map_reset_binding_1*/ ctx[29](value);
     	}
 
-    	let map_props = { toggle: /*toggle*/ ctx[2] };
+    	let map_props = { toggle: /*toggle*/ ctx[3] };
 
     	if (/*A*/ ctx[0] !== void 0) {
     		map_props.A = /*A*/ ctx[0];
     	}
 
-    	if (/*reset*/ ctx[3] !== void 0) {
-    		map_props.reset = /*reset*/ ctx[3];
+    	if (/*reset*/ ctx[4] !== void 0) {
+    		map_props.reset = /*reset*/ ctx[4];
     	}
 
     	map = new Map$1({ props: map_props });
@@ -29191,15 +29048,15 @@ var app = (function () {
     				add_flush_callback(() => updating_A = false);
     			}
 
-    			if (!updating_reset && dirty[0] & /*reset*/ 8) {
+    			if (!updating_reset && dirty[0] & /*reset*/ 16) {
     				updating_reset = true;
-    				events2_changes.reset = /*reset*/ ctx[3];
+    				events2_changes.reset = /*reset*/ ctx[4];
     				add_flush_callback(() => updating_reset = false);
     			}
 
     			events2.$set(events2_changes);
     			const map_changes = {};
-    			if (dirty[0] & /*toggle*/ 4) map_changes.toggle = /*toggle*/ ctx[2];
+    			if (dirty[0] & /*toggle*/ 8) map_changes.toggle = /*toggle*/ ctx[3];
 
     			if (!updating_A_1 && dirty[0] & /*A*/ 1) {
     				updating_A_1 = true;
@@ -29207,9 +29064,9 @@ var app = (function () {
     				add_flush_callback(() => updating_A_1 = false);
     			}
 
-    			if (!updating_reset_1 && dirty[0] & /*reset*/ 8) {
+    			if (!updating_reset_1 && dirty[0] & /*reset*/ 16) {
     				updating_reset_1 = true;
-    				map_changes.reset = /*reset*/ ctx[3];
+    				map_changes.reset = /*reset*/ ctx[4];
     				add_flush_callback(() => updating_reset_1 = false);
     			}
 
@@ -29239,7 +29096,7 @@ var app = (function () {
     	};
     }
 
-    // (124:3) {#if toggle != "events"}
+    // (151:3) {#if toggle != "events" && ready === true}
     function create_if_block_1(ctx) {
     	let div0;
     	let list;
@@ -29259,8 +29116,8 @@ var app = (function () {
 
     	let list_props = { A: /*A*/ ctx[0] };
 
-    	if (/*toggle*/ ctx[2] !== void 0) {
-    		list_props.toggle = /*toggle*/ ctx[2];
+    	if (/*toggle*/ ctx[3] !== void 0) {
+    		list_props.toggle = /*toggle*/ ctx[3];
     	}
 
     	list = new List({ props: list_props });
@@ -29274,14 +29131,14 @@ var app = (function () {
     		/*map_reset_binding*/ ctx[23](value);
     	}
 
-    	let map_props = { toggle: /*toggle*/ ctx[2] };
+    	let map_props = { toggle: /*toggle*/ ctx[3] };
 
     	if (/*A*/ ctx[0] !== void 0) {
     		map_props.A = /*A*/ ctx[0];
     	}
 
-    	if (/*reset*/ ctx[3] !== void 0) {
-    		map_props.reset = /*reset*/ ctx[3];
+    	if (/*reset*/ ctx[4] !== void 0) {
+    		map_props.reset = /*reset*/ ctx[4];
     	}
 
     	map = new Map$1({ props: map_props });
@@ -29319,15 +29176,15 @@ var app = (function () {
     			const list_changes = {};
     			if (dirty[0] & /*A*/ 1) list_changes.A = /*A*/ ctx[0];
 
-    			if (!updating_toggle && dirty[0] & /*toggle*/ 4) {
+    			if (!updating_toggle && dirty[0] & /*toggle*/ 8) {
     				updating_toggle = true;
-    				list_changes.toggle = /*toggle*/ ctx[2];
+    				list_changes.toggle = /*toggle*/ ctx[3];
     				add_flush_callback(() => updating_toggle = false);
     			}
 
     			list.$set(list_changes);
     			const map_changes = {};
-    			if (dirty[0] & /*toggle*/ 4) map_changes.toggle = /*toggle*/ ctx[2];
+    			if (dirty[0] & /*toggle*/ 8) map_changes.toggle = /*toggle*/ ctx[3];
 
     			if (!updating_A && dirty[0] & /*A*/ 1) {
     				updating_A = true;
@@ -29335,9 +29192,9 @@ var app = (function () {
     				add_flush_callback(() => updating_A = false);
     			}
 
-    			if (!updating_reset && dirty[0] & /*reset*/ 8) {
+    			if (!updating_reset && dirty[0] & /*reset*/ 16) {
     				updating_reset = true;
-    				map_changes.reset = /*reset*/ ctx[3];
+    				map_changes.reset = /*reset*/ ctx[4];
     				add_flush_callback(() => updating_reset = false);
     			}
 
@@ -29451,45 +29308,96 @@ var app = (function () {
     	};
     }
 
+    const SLUG = "wp-json/geodir/v2/";
+
     function instance($$self, $$props, $$invalidate) {
-    	let $isBigArray;
+    	let $pages;
     	let $selectedItem;
     	let $mobileViewport;
-    	component_subscribe($$self, isBigArray, $$value => $$invalidate(34, $isBigArray = $$value));
+    	component_subscribe($$self, pages, $$value => $$invalidate(34, $pages = $$value));
     	component_subscribe($$self, selectedItem, $$value => $$invalidate(35, $selectedItem = $$value));
     	component_subscribe($$self, mobileViewport, $$value => $$invalidate(36, $mobileViewport = $$value));
     	let { name = "tavernasso" } = $$props;
-    	let A;
-    	let ABackup; // <-- A : Données principales, 95% data des différents lieux
+    	let A = [], ABackup; // <-- A : Données principales, 95% data des différents lieux
     	let ready = false;
+    	let isFocused = false;
     	let toggle = "commerces";
     	let reset = false;
     	let fireForm = false;
-    	let isFocused = false;
     	let toggleMenu = false;
     	let mapContainer;
     	let weather = [];
 
     	onMount(async () => {
-    		//localStorage.clear();
+    		localStorage.clear();
+
     		//makeCategories("events").then((e) => console.log(e));
     		set_store_value(mobileViewport, $mobileViewport.mob = window.matchMedia("(max-width: 768px)"), $mobileViewport);
 
     		set_store_value(mobileViewport, $mobileViewport.touch = window.matchMedia("(max-width: 1024px)"), $mobileViewport);
     		$$invalidate(8, weather = await getWeather());
-
-    		getPlaces("commerces").then(p => {
-    			$$invalidate(0, A = ABackup = p);
-    			if (toggle == "events") $$invalidate(0, A = A.sort((a, b) => Date.parse(a.start_date.raw) - Date.parse(b.start_date.raw)));
-    			isBigArray.set(Array(p.length).fill(false));
-    			$$invalidate(1, ready = true);
-    		});
+    		furnish(1, "commerces");
     	});
 
-    	function handleSwitch(e) {
-    		$$invalidate(3, reset = false);
+    	let furnish = async (idx, tog) => {
+    		const Atemp = getWithExpiry(tog);
+
+    		if (Atemp) {
+    			$$invalidate(0, A = [...Atemp]);
+
+    			if ($pages[tog].current === undefined) {
+    				$$invalidate(1, ready = true);
+    				return;
+    			}
+    		}
+
+    		if (tog === toggle) {
+    			($pages[tog]?.current)
+    			? idx = $pages[tog].current
+    			: set_store_value(pages, $pages[tog].current = idx, $pages);
+
+    			const options = `?per_page=10&page=${idx}`;
+    			const res = await axios(`${API}${SLUG + tog}${options}`);
+
+    			if ($pages[tog].total === undefined) {
+    				pages.update(tp => tp = {
+    					...tp,
+    					[tog]: {
+    						total: parseInt(res.headers["x-wp-totalpages"]) || 0,
+    						current: idx
+    					}
+    				});
+    			}
+
+    			let p = await res.data;
+
+    			if (tog == "events") p = p.sort((a, b) => (Date.parse(a.start_date?.raw) || 1) - (Date.parse(b.start_date?.raw) || 0)); else p = p.sort((a, b) => a.title.raw > b.title.raw
+    			? 1
+    			: b.title.raw > a.title.raw ? -1 : 0);
+
+    			tog === toggle && (ABackup = $$invalidate(0, A = [...A, ...p]));
+    			$$invalidate(1, ready = true);
+
+    			if (idx < $pages[tog].total) {
+    				if (tog === toggle) {
+    					console.log(tog, idx, $pages[tog]);
+    					setWithExpiry(tog, A, 900000);
+    					furnish(set_store_value(pages, ++$pages[tog].current, $pages), tog);
+    				}
+    			} else if ($pages[tog].total > 0) {
+    				console.log("c'est bon j'ai fini", tog, toggle, idx, $pages[tog]);
+    				set_store_value(pages, $pages[tog].total = undefined, $pages);
+    				set_store_value(pages, $pages[tog].current = undefined, $pages);
+    			}
+    		}
+    	};
+
+    	async function handleSwitch(e) {
+    		$$invalidate(4, reset = false);
+    		$$invalidate(1, ready = false);
 
     		if (e.detail.text == 'update') {
+    			console.log("on update");
     			$$invalidate(1, ready = false);
     			$$invalidate(0, A = [...ABackup]);
     			if ($selectedItem && $selectedItem.type == 'category') $$invalidate(0, A = A.filter(item => item.default_category == $selectedItem.id)); else if ($selectedItem && $selectedItem.type == 'place') $$invalidate(0, A = A.filter(item => item.id == $selectedItem.id));
@@ -29501,25 +29409,17 @@ var app = (function () {
     			$$invalidate(0, A = A.filter(item => Date.parse(item.start_date.raw) >= Date.parse(dates.start) && Date.parse(item.start_date.raw) <= Date.parse(dates.end)));
     			$$invalidate(1, ready = true);
     		} else if (e.detail.text == 'form') {
-    			$$invalidate(4, fireForm = true);
+    			$$invalidate(5, fireForm = true);
     		} else if (e.detail.text == 'reset') {
+    			console.log(" on resete à tonton ");
     			$$invalidate(0, A = [...ABackup]);
     			set_store_value(selectedItem, $selectedItem = false, $selectedItem);
     		} else {
     			$$invalidate(1, ready = false);
-    			$$invalidate(3, reset = true);
-    			$$invalidate(2, toggle = e.detail.mode);
-
-    			getPlaces(toggle).then(p => {
-    				$$invalidate(0, A = p);
-    				if (toggle == "events") $$invalidate(0, A = A.sort((a, b) => Date.parse(a.start_date.raw) - Date.parse(b.start_date.raw)));
-    				ABackup = A;
-
-    				//console.log(A);
-    				set_store_value(isBigArray, $isBigArray = [], $isBigArray);
-
-    				$$invalidate(1, ready = true);
-    			});
+    			$$invalidate(4, reset = true);
+    			$$invalidate(3, toggle = e.detail.mode);
+    			$$invalidate(0, A = []);
+    			await furnish($pages[toggle]?.current || 1, toggle);
     		}
     	}
 
@@ -29532,17 +29432,17 @@ var app = (function () {
 
     	function formidable_fireForm_binding(value) {
     		fireForm = value;
-    		$$invalidate(4, fireForm);
+    		$$invalidate(5, fireForm);
     	}
 
     	const fireSnack_handler = () => fireSnack(e => e.detail.props);
 
     	function modal_active_binding(value) {
     		fireForm = value;
-    		$$invalidate(4, fireForm);
+    		$$invalidate(5, fireForm);
     	}
 
-    	const close_handler = () => $$invalidate(4, fireForm = false);
+    	const close_handler = () => $$invalidate(5, fireForm = false);
 
     	function navigation_A_binding(value) {
     		A = value;
@@ -29551,7 +29451,7 @@ var app = (function () {
 
     	function navigation_toggle_binding(value) {
     		toggle = value;
-    		$$invalidate(2, toggle);
+    		$$invalidate(3, toggle);
     	}
 
     	function navigation_toggleMenu_binding(value) {
@@ -29563,10 +29463,10 @@ var app = (function () {
 
     	function list_toggle_binding(value) {
     		toggle = value;
-    		$$invalidate(2, toggle);
+    		$$invalidate(3, toggle);
     	}
 
-    	const click_handler = () => $$invalidate(5, isFocused = true);
+    	const click_handler = () => $$invalidate(2, isFocused = true);
 
     	function map_A_binding(value) {
     		A = value;
@@ -29575,10 +29475,10 @@ var app = (function () {
 
     	function map_reset_binding(value) {
     		reset = value;
-    		$$invalidate(3, reset);
+    		$$invalidate(4, reset);
     	}
 
-    	const click_handler_1 = () => $$invalidate(5, isFocused = false);
+    	const click_handler_1 = () => $$invalidate(2, isFocused = false);
 
     	function events2_A_binding(value) {
     		A = value;
@@ -29587,10 +29487,10 @@ var app = (function () {
 
     	function events2_reset_binding(value) {
     		reset = value;
-    		$$invalidate(3, reset);
+    		$$invalidate(4, reset);
     	}
 
-    	const click_handler_2 = () => $$invalidate(5, isFocused = true);
+    	const click_handler_2 = () => $$invalidate(2, isFocused = true);
 
     	function map_A_binding_1(value) {
     		A = value;
@@ -29599,10 +29499,10 @@ var app = (function () {
 
     	function map_reset_binding_1(value) {
     		reset = value;
-    		$$invalidate(3, reset);
+    		$$invalidate(4, reset);
     	}
 
-    	const click_handler_3 = () => $$invalidate(5, isFocused = false);
+    	const click_handler_3 = () => $$invalidate(2, isFocused = false);
 
     	function div1_binding($$value) {
     		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
@@ -29620,10 +29520,10 @@ var app = (function () {
     	return [
     		A,
     		ready,
+    		isFocused,
     		toggle,
     		reset,
     		fireForm,
-    		isFocused,
     		toggleMenu,
     		mapContainer,
     		weather,

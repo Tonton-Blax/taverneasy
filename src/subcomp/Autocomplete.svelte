@@ -3,10 +3,10 @@
 <script>
 
   // the list of items  the user can select from
-  import { onMount } from 'svelte'
+  import { onMount, createEventDispatcher } from 'svelte'
   export let items;
 
-
+  const dispatch = createEventDispatcher();
   // field of each item that's used for the labels in the list
   export let labelFieldName = undefined;
   export let keywordsFieldName = labelFieldName;
@@ -280,6 +280,7 @@
     }
     const newSelectedItem = listItem.item;
     if (beforeChange(selectedItem, newSelectedItem)) {
+      dispatch("update");
       selectedItem = newSelectedItem;
     }
   }

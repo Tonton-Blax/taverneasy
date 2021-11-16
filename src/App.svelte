@@ -6,7 +6,6 @@
 </svelte:head>
 
 <script>
-import { selectedItem, isBigArray } from './stores.js';
 import List from './List.svelte';
 import Map from './Map.svelte';
 import Events2 from './Events2.svelte';
@@ -14,46 +13,81 @@ import Navigation from './Navigation.svelte';
 import Modal from './subcomp/Modal.svelte'
 import Formidable from './Formidable.svelte'
 import { onMount } from 'svelte';
-import {getPlaces, makeCategories, getWeather } from './utils/consts.js';
-import axios from 'axios'
+import { makeCategories, getWeather, API, setWithExpiry, getWithExpiry } from './utils/consts.js';
 import { Snackbar } from 'svelma-pro'
-import { fly,fade } from 'svelte/transition';
-import { mobileViewport } from './stores.js';
-
+import { fly } from 'svelte/transition';
+import { mobileViewport, pages, selectedItem } from './stores.js';
+import axios from 'axios';
 export let name = "tavernasso"
 
-let A; let ABackup; // <-- A : Données principales, 95% data des différents lieux
+let A = [], ABackup; // <-- A : Données principales, 95% data des différents lieux
 let ready = false;
+let isFocused = false;
 let toggle = "commerces";
 let reset=false;
-let filtrage=false;
 let fireForm = false;
-let isFocused = false;
 let toggleMenu = false;
 let mapContainer;
 let weather = []
+const SLUG = "wp-json/geodir/v2/"
 
 	onMount(async () => {	
-		//localStorage.clear();
-		
+		localStorage.clear();
 		//makeCategories("events").then((e) => console.log(e));
 		$mobileViewport.mob = window.matchMedia("(max-width: 768px)"); 
 		$mobileViewport.touch = window.matchMedia("(max-width: 1024px)"); 
 		weather = await getWeather();
-		getPlaces("commerces")
-			.then((p) => { 
-				A = ABackup = p;
-				if (toggle=="events") A = A.sort((a, b) => Date.parse(a.start_date.raw) - Date.parse(b.start_date.raw));
-				isBigArray.set(Array(p.length).fill(false));
-				ready=true;
-		});
+		furnish(1, "commerces");
 	});
 
-	function handleSwitch (e) {
+	let furnish = async (idx, tog) => {
+		const Atemp = getWithExpiry(tog);
+		if (Atemp) {
+			A = [...Atemp];
+			if ($pages[tog].current === undefined) {
+				ready = true;
+				return;
+			}
+		}
+		if (tog === toggle) {
+			$pages[tog]?.current ? idx = $pages[tog].current : $pages[tog].current = idx;
+			const options = `?per_page=10&page=${idx}`;
+			const res = await axios(`${API}${SLUG+tog}${options}`);
+
+			if ($pages[tog].total === undefined){
+				pages.update(tp => tp = {...tp, [tog] : { total : parseInt(res.headers["x-wp-totalpages"]) || 0, current : idx } });
+			}
+			
+			let p = await res.data;
+			if (tog=="events") 
+				p = p.sort((a, b) => (Date.parse(a.start_date?.raw) || 1) - (Date.parse(b.start_date?.raw) || 0));
+			else 
+				p = p.sort((a,b) => (a.title.raw > b.title.raw) ? 1 : ((b.title.raw > a.title.raw) ? -1 : 0))
+			
+				tog === toggle && (ABackup = A = [...A, ...p]);
+
+			ready = true;
+			if (idx < $pages[tog].total) {
+				if (tog === toggle) {
+					console.log(tog, idx, $pages[tog]);
+					setWithExpiry(tog, A, 900000);
+					furnish(++$pages[tog].current, tog);
+				}
+			} else if ($pages[tog].total > 0) {
+				console.log("c'est bon j'ai fini", tog, toggle, idx, $pages[tog])
+				$pages[tog].total = undefined;
+				$pages[tog].current = undefined;	
+			}
+		}
+	}
+
+	async function handleSwitch (e) {
 
 		reset=false;
+		ready = false;
 
-		if (e.detail.text == 'update') {	
+		if (e.detail.text == 'update') {
+			console.log("on update");
 			ready = false;
 			A = [...ABackup];
 
@@ -76,6 +110,7 @@ let weather = []
 			fireForm=true;
 		}
 		else if (e.detail.text == 'reset') {
+			console.log(" on resete à tonton ")
 			A = [...ABackup];
 			$selectedItem = false;
 		}
@@ -84,15 +119,8 @@ let weather = []
 			ready=false;
 			reset=true;
 			toggle = e.detail.mode;
-
-			getPlaces(toggle).then((p) => {
-				A = p;
-				if (toggle=="events") A = A.sort((a, b) => Date.parse(a.start_date.raw) - Date.parse(b.start_date.raw));
-				ABackup = A;
-				//console.log(A);
-				$isBigArray = [];
-				ready = true;
-			});
+			A = [];
+			await furnish($pages[toggle]?.current || 1, toggle);
 		}
 	}
 
@@ -112,16 +140,14 @@ let weather = []
 	{:else}
 	<div class="container">
 
-		{#if fireForm}
 			<Modal on:close="{() => fireForm = false}" closeText = "Annuler et revenir" title="Faisons connaissance" width="40vw" bind:active={fireForm}>
 				<Formidable on:fireSnack={() => fireSnack(e => e.detail.props)} bind:fireForm />
 			</Modal>
-		{/if}	
 		
 		<Navigation bind:A bind:toggle bind:toggleMenu on:message={(e)=>handleSwitch(e)} />
 
 		<div class="columns" on:click|passive={()=>toggleMenu=false}>
-			{#if toggle != "events"}
+			{#if toggle != "events" && ready === true}
 				<div class="paneman leftman" on:click={()=>isFocused=true}>
 					<List {A} bind:toggle />
 				</div>
