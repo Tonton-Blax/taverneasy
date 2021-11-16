@@ -32,7 +32,7 @@ let items = {associations : [], commerces : [], liberales : []};
 let weather;
 
 //const API = 'http://192.168.1.142:8080/index.php/';
-const API = 'https://taverneasy.hopto.org:8080/index.php/';
+const API = 'https://maximeredval.fr/wp/';
 /*
 const WEATHERAPIKEY = "67cb859c2dcbc7136d2e382637f0aa80";
 const WEATHERAPIID = "2973258";
