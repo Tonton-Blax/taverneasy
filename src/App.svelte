@@ -33,7 +33,6 @@ const SLUG = "wp-json/geodir/v2/"
 
 	onMount(async () => {	
 		localStorage.clear();
-		//makeCategories("events").then((e) => console.log(e));
 		$mobileViewport.mob = window.matchMedia("(max-width: 768px)"); 
 		$mobileViewport.touch = window.matchMedia("(max-width: 1024px)"); 
 		weather = await getWeather();

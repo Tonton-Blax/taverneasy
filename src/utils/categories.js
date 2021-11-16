@@ -11,257 +11,251 @@ export let dicoIcons =
 ///////////////////////////////////
 ///////////////////////////////////
 ///////////////////////////////////
-
 {
   "accessoires": {
-    "name": "Accesoires",
-    "icon": "accessoire.svg",
-    "color": "#e6e1d"
+      "name": "Accessoires",
+      "icon": "accessoire.svg",
+      "color": "#971b22"
   },
   "agence-immobiliere": {
-    "name": "Agence immobilière",
-    "icon": "agenceimmo.svg",
-    "color": "#1ff85d"
+      "name": "Agence immobilière",
+      "icon": "agenceimmo.svg",
+      "color": "#b1c2c0"
   },
   "alimentaire": {
-    "name": "Alimentaire",
-    "icon": "undefined.svg",
-    "color": "#b737eb"
+      "name": "Alimentaire",
+      "icon": "undefined.svg",
+      "color": "#87e863"
   },
   "assurances": {
-    "name": "Assurances",
-    "icon": "assurance.svg",
-    "color": "#87ced6"
+      "name": "Assurances",
+      "icon": "assurancegood.svg",
+      "color": "#11fbba"
   },
   "auto-ecole": {
-    "name" : "Auto-école",
-    "icon" : "auto-ecole.svg",
-    "color": "#808080"
+      "name": "Auto-école",
+      "icon": "autoecole-1.svg",
+      "color": "#372f5"
   },
   "auto-moto": {
-    "name": "Auto-Moto",
-    "icon": "undefined.svg",
-    "color": "#d6d23b"
-  },
-  "avocat": {
-    "name": "Avocat",
-    "icon": "avocat.notaire.svg",
-    "color": "#2a0ee2"
+      "name": "Auto-Moto",
+      "icon": "undefined.svg",
+      "color": "#c18fb5"
   },
   "banque": {
-    "name": "Banque",
-    "icon": "banque.svg",
-    "color": "#64b55"
+      "name": "Banque",
+      "icon": "banque.svg",
+      "color": "#68d433"
   },
   "bar": {
-    "name": "Bar",
-    "icon": "bar.svg",
-    "color": "#501b96"
+      "name": "Bar",
+      "icon": "bar.svg",
+      "color": "#861ce4"
   },
   "boucherie": {
-    "name": "Boucherie",
-    "icon": "boucher.svg",
-    "color": "#a4b953"
+      "name": "Boucherie",
+      "icon": "boucher.svg",
+      "color": "#2b7ecb"
   },
   "boulangerie": {
-    "name": "Boulangerie",
-    "icon": "boulangerie.svg",
-    "color": "#ddccc0"
+      "name": "Boulangerie",
+      "icon": "boulangerie.svg",
+      "color": "#8d56a6"
   },
   "chaussures": {
-    "name": "Chaussures",
-    "icon": "shoes.svg",
-    "color": "#c5917d"
+      "name": "Chaussures",
+      "icon": "shoes.svg",
+      "color": "#40f961"
   },
   "cigarette-electronique": {
-    "name": "Cigarette électronique",
-    "icon": "cigaretteelectronique.svg",
-    "color": "#7af67e"
+      "name": "Cigarette électronique",
+      "icon": "cigaretteelectronique.svg",
+      "color": "#3f1a5f"
   },
   "cinema": {
-    "name": "Cinéma",
-    "icon": "cinema-1.svg",
-    "color": "#b30f0a"
+      "name": "Cinéma",
+      "icon": "cinema-1.svg",
+      "color": "#74445e"
   },
   "coiffeur": {
-    "name": "Coiffeur",
-    "icon": "coiffeur.svg",
-    "color": "#2b5d2b"
+      "name": "Coiffeur",
+      "icon": "coiffeur.svg",
+      "color": "#39b09e"
   },
   "cordonnerie": {
-    "name": "Cordonnerie",
-    "icon": "coordonnerie.svg",
-    "color": "#f4fb5a"
+      "name": "Cordonnerie",
+      "icon": "coordonnerie.svg",
+      "color": "#c36fd1"
   },
   "culture-et-divertissement": {
-    "name": "Culture et divertissement",
-    "icon": "undefined.svg",
-    "color": "#3987c5"
+      "name": "Culture et divertissement",
+      "icon": "undefined.svg",
+      "color": "#92cfec"
   },
   "enfants": {
-    "name": "Enfants",
-    "icon": "kids.svg",
-    "color": "#ee0044"
+      "name": "Enfants",
+      "icon": "kids.svg",
+      "color": "#83ba8f"
   },
   "epiceie": {
-    "name": "Epicerie",
-    "icon": "epicerie.svg",
-    "color": "#9dbdd8"
+      "name": "Epicerie",
+      "icon": "epicerie.svg",
+      "color": "#a0e385"
   },
   "estheticienne": {
-    "name": "Esthéticienne",
-    "icon": "esthetique.svg",
-    "color": "#8bda1b"
+      "name": "Esthéticienne",
+      "icon": "esthetique.svg",
+      "color": "#a974cf"
+  },
+  "fleuriste": {
+      "name": "Fleuriste",
+      "icon": "fleuriste.svg",
+      "color": "#f5f48"
   },
   "garage": {
-    "name": "Garage",
-    "icon": "garage-1.svg",
-    "color": "#38295a"
+      "name": "Garage",
+      "icon": "garage-1.svg",
+      "color": "#b9b2ec"
   },
   "habillement": {
-    "name": "Habillement",
-    "icon": "vetement.svg",
-    "color": "#383109"
+      "name": "Habillement",
+      "icon": "vetement.svg",
+      "color": "#d3c406"
   },
   "impot": {
-    "name": "Impôts",
-    "icon": "patrimoine.svg",
-    "color": "#a0d023"
+      "name": "Impôts",
+      "icon": "patrimoine.svg",
+      "color": "#6c10e0"
   },
   "laboratoire-radiographie": {
-    "name": "Laboratoire radiographie",
-    "icon": "labo.svg",
-    "color": "#dbb600"
+      "name": "Laboratoire radiographie",
+      "icon": "labo.svg",
+      "color": "#f736ee"
   },
   "lavage-auto": {
-    "name": "Lavage auto",
-    "icon": "lavagevoiture-1.svg",
-    "color": "#49bb98"
+      "name": "Lavage auto",
+      "icon": "lavagevoiture-1.svg",
+      "color": "#bf4e7a"
   },
   "laverie": {
-    "name": "Laverie",
-    "icon": "laveriegood.svg",
-    "color": "#4a497f"
+      "name": "Laverie",
+      "icon": "laveriegood.svg",
+      "color": "#b4c563"
   },
   "librairie-papeterie": {
-    "name": "Librairie Papeterie",
-    "icon": "librairie.svg",
-    "color": "#dcf6e"
+      "name": "Librairie Papeterie",
+      "icon": "librairie.svg",
+      "color": "#1e6acc"
   },
   "lingerie": {
-    "name": "Lingerie",
-    "icon": "lingerie.svg",
-    "color": "#31c0a2"
+      "name": "Lingerie",
+      "icon": "lingerie.svg",
+      "color": "#d21b40"
   },
   "mairie": {
-    "name": "Mairie",
-    "icon": "patrimoine.svg",
-    "color": "#53c2e0"
-  },
-  "medecin-generaliste": {
-    "name": "Médecin généraliste",
-    "icon": "doctor1.svg",
-    "color": "#752944"
-  },
-  "medecin-specialiste": {
-    "name": "Médecin Spécialiste",
-    "icon": "doctor1.svg",
-    "color": "#152c7c"
+      "name": "Mairie",
+      "icon": "patrimoine.svg",
+      "color": "#7396dd"
   },
   "medical-1": {
-    "name": "Médical",
-    "icon": "undefined.svg",
-    "color": "#3883a8"
-  },
-  "notaire": {
-    "name": "Notaire",
-    "icon": "avocat.notaire.svg",
-    "color": "#c99d1f"
+      "name": "Médical",
+      "icon": "undefined.svg",
+      "color": "#a5f30e"
   },
   "opticien-audioprothesiste": {
-    "name": "Opticien Audioprothésiste",
-    "icon": "opticien.svg",
-    "color": "#feb9e0"
+      "name": "Opticien Audioprothésiste",
+      "icon": "opticien.svg",
+      "color": "#e86736"
   },
   "parfumerie": {
-    "name": "Parfumerie",
-    "icon": "parfum.svg",
-    "color": "#5b5fb4"
+      "name": "Parfumerie",
+      "icon": "parfum.svg",
+      "color": "#538614"
   },
   "pharmacie": {
-    "name": "Pharmacie",
-    "icon": "pharmacie.svg",
-    "color": "#84c87"
+      "name": "Pharmacie",
+      "icon": "pharmacie.svg",
+      "color": "#f1d950"
+  },
+  "photographe": {
+      "name": "Photographe",
+      "icon": "photographe.svg",
+      "color": "#c7b6b4"
   },
   "piscine-municipale": {
-    "name": "Piscine municipale",
-    "icon": "nautique.svg",
-    "color": "#c89459"
+      "name": "Piscine municipale",
+      "icon": "nautique.svg",
+      "color": "#c013b1"
   },
   "pompes-funebre": {
-    "name": "Pompes funèbres",
-    "icon": "pompefunebre-1.svg",
-    "color": "#2d8cfb"
+      "name": "Pompes funèbres",
+      "icon": "pompefunebre-1.svg",
+      "color": "#2cafae"
   },
   "poste": {
-    "name": "Poste",
-    "icon": "collection.svg",
-    "color": "#539913"
+      "name": "Poste",
+      "icon": "collection.svg",
+      "color": "#130601"
   },
   "reparation-informatique": {
-    "name": "Réparation informatique",
-    "icon": "reparationinfo.svg",
-    "color": "#df56d9"
+      "name": "Réparation informatique",
+      "icon": "reparationinfo.svg",
+      "color": "#727aee"
   },
   "restaurant-1": {
-    "name": "Restaurant",
-    "icon": "restaurant.svg",
-    "color": "#23a985"
+      "name": "Restaurant",
+      "icon": "restaurant.svg",
+      "color": "#d69dc5"
   },
   "retoucherie": {
-    "name": "Retoucherie",
-    "icon": "retoucherie.svg",
-    "color": "#1f9d4f"
-  },
-  "service-public": {
-    "name": "Service Public",
-    "icon": "undefined.svg",
-    "color": "#7476b8"
-  },
-  "services": {
-    "name": "Services",
-    "icon": "services.svg",
-    "color": "#b659fb"
+      "name": "Retoucherie",
+      "icon": "retoucherie.svg",
+      "color": "#415f29"
   },
   "service-a-la-personne": {
-    "name": "Services à la personne",
-    "icon": "service-a-la-personne.svg",
-    "color": "#b659fb"
+      "name": "Service à la personne",
+      "icon": "servicepersonne.svg",
+      "color": "#7f071d"
+  },
+  "service-carte-grise-plaque-immatriculation": {
+      "name": "Service carte grise plaque immatriculation",
+      "icon": "cartegrise.svg",
+      "color": "#2cbea8"
+  },
+  "service-public": {
+      "name": "Service Public",
+      "icon": "undefined.svg",
+      "color": "#70a038"
+  },
+  "services": {
+      "name": "Services",
+      "icon": "undefined.svg",
+      "color": "#45ad02"
   },
   "bien-etre": {
-    "name": "Soins et Bien-Etre",
-    "icon": "undefined.svg",
-    "color": "#c5fdcc"
+      "name": "Soins et Bien-Etre",
+      "icon": "undefined.svg",
+      "color": "#21b1a0"
   },
   "station-service": {
-    "name": "Station service",
-    "icon": "station-service.svg",
-    "color": "#e27135"
+      "name": "Station service",
+      "icon": "station-service.svg",
+      "color": "#abc9df"
   },
   "supermarche": {
-    "name": "Supermarché",
-    "icon": "supermarche.svg",
-    "color": "#f53c2d"
+      "name": "Supermarché",
+      "icon": "supermarche.svg",
+      "color": "#8028a6"
   },
   "tabac": {
-    "name": "Tabac",
-    "icon": "tabac.svg",
-    "color": "#e3f86d"
+      "name": "Tabac",
+      "icon": "tabac.svg",
+      "color": "#722144"
   },
   "telephonie-internet": {
-    "name": "Téléphonie internet",
-    "icon": "magasininformatik.svg",
-    "color": "#58d6ba"
+      "name": "Téléphonie internet",
+      "icon": "magasininformatik.svg",
+      "color": "#949019"
   },
   "uncategorized": {
     "name": "Uncategorized",
@@ -275,161 +269,165 @@ export let dicoIcons =
 ///////////////////////////////////
 
   "anciens-combattants": {
-    "name": "Anciens Combattants",
-    "icon": "anciencombattant-1.svg",
-    "color": "#425a3c"
+      "name": "Anciens Combattants",
+      "icon": "anciencombattant-1.svg",
+      "color": "#c81339"
   },
   "arts": {
-    "name": "Arts",
-    "icon": "art.svg",
-    "color": "#582765"
+      "name": "Arts",
+      "icon": "art.svg",
+      "color": "#1d3adb"
   },
   "arts-martiaux": {
-    "name": "Arts martiaux",
-    "icon": "artsmartiaux.svg",
-    "color": "#7052d0"
+      "name": "Arts martiaux",
+      "icon": "artsmartiaux.svg",
+      "color": "#64a951"
   },
   "association-sportives-scolaire": {
-    "name": "Association Sportives Scolaire",
-    "icon": "as.svg",
-    "color": "#63ea24"
+      "name": "Association Sportives Scolaire",
+      "icon": "as.svg",
+      "color": "#de836b"
   },
   "associations-cultuelles": {
-    "name": "Associations Cultuelles",
-    "icon": "cultuelle.svg",
-    "color": "#8b4a59"
+      "name": "Associations Cultuelles",
+      "icon": "cultuelle.svg",
+      "color": "#271bcd"
   },
   "feature": {
-    "name": "Associations Culturelles",
-    "icon": "undefined.svg",
-    "color": "#8ffa56"
+      "name": "Associations Culturelles",
+      "icon": "undefined.svg",
+      "color": "#986cb8"
   },
   "associations_sportives": {
-    "name": "Associations Sportives",
-    "icon": "undefined.svg",
-    "color": "#e9675d"
+      "name": "Associations Sportives",
+      "icon": "undefined.svg",
+      "color": "#a2122c"
   },
   "athletisme": {
-    "name": "Athlétisme",
-    "icon": "athletisme.svg",
-    "color": "#12e8c4"
+      "name": "Athlétisme",
+      "icon": "athletisme.svg",
+      "color": "#c492d3"
   },
   "cinema-1": {
-    "name": "Cinéma",
-    "icon": "cinema-1.svg",
-    "color": "#a7bc6c"
+      "name": "Cinéma",
+      "icon": "cinema-1.svg",
+      "color": "#ee8567"
   },
   "collections": {
-    "name": "Collections",
-    "icon": "collection.svg",
-    "color": "#14a3bf"
+      "name": "Collections",
+      "icon": "collection.svg",
+      "color": "#db3c0b"
   },
   "cyclisme": {
-    "name": "Cyclisme",
-    "icon": "velo.svg",
-    "color": "#bf57e4"
+      "name": "Cyclisme",
+      "icon": "velo.svg",
+      "color": "#4e5eb0"
   },
   "danse": {
-    "name": "Danse",
-    "icon": "danse.svg",
-    "color": "#843432"
+      "name": "Danse",
+      "icon": "danse.svg",
+      "color": "#c75966"
   },
   "restaurants": {
-    "name": "Environnement",
-    "icon": "seeding.svg",
-    "color": "#5603aa"
+      "name": "Environnement",
+      "icon": "seeding.svg",
+      "color": "#5911d7"
   },
   "gymnastique": {
-    "name": "Gymnastique",
-    "icon": "gym.svg",
-    "color": "#331f3b"
+      "name": "Gymnastique",
+      "icon": "gym.svg",
+      "color": "#1a26db"
+  },
+  "humanitaire": {
+      "name": "Humanitaire",
+      "icon": "undefined.svg",
+      "color": "#eb2b5b"
   },
   "jeux-de-cartes": {
-    "name": "Jeux de cartes",
-    "icon": "jeudecarte.svg",
-    "color": "#f6f849"
+      "name": "Jeux de cartes",
+      "icon": "jeudecarte.svg",
+      "color": "#192f9"
   },
   "jumelages": {
-    "name": "Jumelages",
-    "icon": "jumelage.svg",
-    "color": "#4dd7b3"
+      "name": "Jumelages",
+      "icon": "jumelage.svg",
+      "color": "#834784"
   },
   "langues": {
-    "name": "Langues",
-    "icon": "langue.svg",
-    "color": "#f17af4"
+      "name": "Langues",
+      "icon": "langue.svg",
+      "color": "#ffcfc0"
   },
   "multi-actvites": {
-    "name": "Multi-activités",
-    "icon": "multiactivite.svg",
-    "color": "#cfeb8c"
+      "name": "Multi-activités",
+      "icon": "multiactivite.svg",
+      "color": "#c4bef9"
   },
   "musique": {
-    "name": "Musique",
-    "icon": "music02.svg",
-    "color": "#4e0bd2"
+      "name": "Musique",
+      "icon": "music02.svg",
+      "color": "#14444"
   },
   "nature-et-bien-etre": {
-    "name": "Nature et bien-être",
-    "icon": "yoga.svg",
-    "color": "#2b36fd"
+      "name": "Nature et bien-être",
+      "icon": "yoga.svg",
+      "color": "#f3f70a"
   },
   "patrimoine": {
-    "name": "Patrimoine",
-    "icon": "patrimoine.svg",
-    "color": "#179b9c"
+      "name": "Patrimoine",
+      "icon": "patrimoine.svg",
+      "color": "#b94d7c"
   },
   "videos": {
-    "name": "Quartiers",
-    "icon": "quartier.svg",
-    "color": "#4e1856"
+      "name": "Quartiers",
+      "icon": "quartier.svg",
+      "color": "#6bdb00"
   },
   "scolaire": {
-    "name": "Scolaire",
-    "icon": "scolaire.svg",
-    "color": "#751b70"
+      "name": "Scolaire",
+      "icon": "scolaire.svg",
+      "color": "#9cc70c"
   },
   "festival": {
-    "name": "Seniors",
-    "icon": "senior.svg",
-    "color": "#780e22"
+      "name": "Seniors",
+      "icon": "senior.svg",
+      "color": "#12101"
   },
   "services-municipaux": {
-    "name": "Services Municipaux",
-    "icon": "patrimoine.svg",
-    "color": "#e61f4d"
+      "name": "Services Municipaux",
+      "icon": "patrimoine.svg",
+      "color": "#f56aac"
   },
   "solidarite": {
-    "name": "Solidarité",
-    "icon": "community.svg",
-    "color": "#4d4691"
+      "name": "Solidarité",
+      "icon": "community.svg",
+      "color": "#f52e52"
   },
   "sport-nautique": {
-    "name": "Sport nautique",
-    "icon": "nautique.svg",
-    "color": "#9e7600"
+      "name": "Sport nautique",
+      "icon": "nautique.svg",
+      "color": "#e0076d"
   },
   "sports-de-ballon": {
-    "name": "Sports de ballon",
-    "icon": "ballon.svg",
-    "color": "#bf471c"
+      "name": "Sports de ballon",
+      "icon": "ballon.svg",
+      "color": "#b11ed5"
   },
   "sports-de-cible": {
-    "name": "Sports de cible",
-    "icon": "cible.svg",
-    "color": "#d5e803"
+      "name": "Sports de cible",
+      "icon": "cible.svg",
+      "color": "#8828f3"
   },
   "sports-de-raquette": {
-    "name": "Sports de raquette",
-    "icon": "raquette.svg",
-    "color": "#a86715"
+      "name": "Sports de raquette",
+      "icon": "raquette.svg",
+      "color": "#9e80f7"
   },
   "theatre-1": {
-    "name": "Théâtre",
-    "icon": "theater.svg",
-    "color": "#4dc69a"
+      "name": "Théâtre",
+      "icon": "theater.svg",
+      "color": "#3b275c"
   },
-
 
 ///////////////////////////////////
   ///////////////////////////////////

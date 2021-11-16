@@ -48,7 +48,7 @@ const ASSOS = 'wp-json/geodir/v2/places'
 const LIBERALES = 'wp-json/geodir/v2/liberales'
 //const ASSOSCAT = 'wp-json/geodir/v2/places/categories'
 const COMMERCESCAT = 'wp-json/geodir/v2/commerces/categories'
-const OPTIONS = `?per_page=10`;
+const OPTIONS = `?per_page=100`;
 const URLFORM = 'http://maximeredval.fr/wp/wp-json/contact-form-7/v1/contact-forms/430/feedback'
 
   export let dicoDay = {
@@ -157,58 +157,6 @@ const URLFORM = 'http://maximeredval.fr/wp/wp-json/contact-form-7/v1/contact-for
       str += rainString[Math.ceil(weather[diff].probarain / 10)];
 
     return (str.length == 2 ? "" : str)
-  }
-
-
-  export async function getPlaces (placeType, options) {
-    switch (placeType) {
-      case "commerces": return await getCommerces(options); 
-      case "places": return await getAssos(options); 
-      case "events": return await getEvents(options);
-      case "liberales": return await getLiberales(options);
-      default : throw new Error ("Merci de passer un type de structure correc")
-    }
-  }
-    
-  async function getLiberales (options) {
-    
-    if (!liberales) {
-      if (!getWithExpiry('liberales')) {
-        const res = await axios(`${API}${LIBERALES}${options || OPTIONS}`);
-        liberales = res.data;
-        liberales = liberales.sort((a,b) => (a.title.raw > b.title.raw) ? 1 : ((b.title.raw > a.title.raw) ? -1 : 0))
-        setWithExpiry('liberales', res.data, 900000);
-        return liberales;
-      } else return liberales = getWithExpiry('liberales');
-    }
-    else return liberales;
-  }
-
-  async function getAssos (options) {
-    if (!places) {
-      if (!getWithExpiry('localassos')) {
-        const res = await axios(`${API}${ASSOS}${options || OPTIONS}`);
-        places = res.data;
-        places = places.sort((a,b) => (a.title.raw > b.title.raw) ? 1 : ((b.title.raw > a.title.raw) ? -1 : 0))
-        setWithExpiry('localassos', res.data, 900000);
-        return places;
-      } else return places = getWithExpiry('localassos');
-    }
-    else return places;
-  }
-
-  async function getEvents (options) {
-    if (!events) {
-      if (!getWithExpiry('localevents')) {
-        const res = await axios(`${API}${EVENTS}${options || OPTIONS}`);
-        events = res.data;
-        events = getUnique(events,'id');
-        events.pop()
-        setWithExpiry('localevents', events, 900000);
-        return events;
-      } else return events = getWithExpiry('localevents');
-    }
-    else return events;
   }
 
   function getUnique(originalArray, prop) {
@@ -390,7 +338,7 @@ export function allHoraires (jason, toggle) {
 }
 
 export async function makeCategories (slug) {
-  const res = await axios(`http://192.168.1.142:8080/wp-json/geodir/v2/${slug}/categories${OPTIONS}`);
+  const res = await axios(`https://maximeredval.fr/wp/wp-json/geodir/v2/${slug}/categories${OPTIONS}`);
   let h = res.data;
   let r = {};
 
