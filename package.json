@@ -23,6 +23,7 @@
     "bulma": "^0.9.3",
     "bulma-timeline": "^3.0.4",
     "bulmaswatch": "^0.8.1",
+    "dayjs": "^1.10.7",
     "global": "^4.4.0",
     "mapbox-gl": "^2.6.0",
     "rollup-plugin-postcss": "^4.0.1",
