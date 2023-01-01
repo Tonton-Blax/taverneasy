@@ -26,7 +26,7 @@
     "dayjs": "^1.10.7",
     "global": "^4.4.0",
     "mapbox-gl": "^2.6.0",
-    "rollup-plugin-postcss": "^4.0.1",
+    "rollup-plugin-postcss": "^4.0.2",
     "sass": "^1.43.4",
     "sirv-cli": "^1.0.14",
     "svelma-pro": "Tonton-Blax/svelma-pro",
